@@ -3,6 +3,8 @@ import { View, Text, Button, StyleSheet, Image, TouchableOpacity, LayoutAnimatio
 import Mood from '../models/Mood';
 import Location from '../models/Location';
 import Weather from '../models/Weather';
+import CustomeDate from '../widgets/CustomeDate';
+import MapView, { Marker } from 'react-native-maps';
 
 
 const Realm = require('realm');
@@ -38,8 +40,9 @@ class ShowMood extends Component {
             weather: mood.weather
         };
         console.log(mood);
-        
+
         console.log(this.state);
+        console.log(Platform.OS);
         
         if (Platform.OS === 'android') {
             UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -68,13 +71,43 @@ class ShowMood extends Component {
                         />
                     </TouchableOpacity>
                     <View style={{ height: this.state.expandedLocation ? null : 0, overflow: 'hidden' }}>
-                        <Text>{this.state.location.city}</Text>
-                        <Text>{this.state.location.country}</Text>
+                        <Text style={{ textAlign: 'center', fontSize: 20 }}>{this.state.location.city}, {this.state.location.country}</Text>
+
+                        <View style={{ height: 300, marginHorizontal: 15 }}>
+                            <MapView
+                                initialRegion={{
+                                    latitude: parseFloat(this.state.location.latitude),
+                                    longitude: parseFloat(this.state.location.longitude),
+                                    latitudeDelta: 0.0922,
+                                    longitudeDelta: 0.0421,
+                                }}
+                                style={{ ...StyleSheet.absoluteFillObject }}
+                            >
+                                <Marker
+                                    coordinate={{ latitude: parseFloat(this.state.location.latitude), longitude: parseFloat(this.state.location.longitude) }}
+                                    style={styles.mainMoodImg}
+                                >
+                                    <Image
+                                        style={styles.moodImg}
+                                        source={this.mainMoodImg()}
+                                    />
+                                </Marker>
+                            </MapView>
+                        </View>
                     </View>
                 </View>
             );
         }
+    }
 
+    mainMoodImg() {
+        if (this.state.mainMood == 1) {
+            return require('../resources/images/sad_icon.png')
+        } else if (this.state.mainMood == 2) {
+            return require('../resources/images/normal_icon.png')
+        } else if (this.state.mainMood == 3) {
+            return require('../resources/images/happy_icon.png')
+        }
     }
 
     onPressMood(mood) {
@@ -90,32 +123,6 @@ class ShowMood extends Component {
             })
         }
     }
-
-    displayMainMood() {
-        if (this.state.mainMood == 1) {
-            return (
-                < Image
-                    style={styles.imgMainMood}
-                    source={require('../resources/images/sad_icon.png')}
-                />
-            );
-        } else if (this.state.mainMood == 2) {
-            return (
-                < Image
-                    style={styles.imgMainMood}
-                    source={require('../resources/images/normal_icon.png')}
-                />
-            );
-        } else if (this.state.mainMood == 3) {
-            return (
-                < Image
-                    style={styles.imgMainMood}
-                    source={require('../resources/images/happy_icon.png')}
-                />
-            );
-        }
-    }
-
 
     displayMood(mood) {
         if (mood == 1) {
@@ -187,7 +194,7 @@ class ShowMood extends Component {
     }
 
     displayAllMood() {
-        if(this.state.moods.length != 0){
+        if (this.state.moods.length != 0) {
             return (
                 <View>
                     <TouchableOpacity activeOpacity={0.8} onPress={this.changeLayout} style={styles.catagoryHeader}>
@@ -209,24 +216,22 @@ class ShowMood extends Component {
                 </View>
             );
         }
-        
+
     }
 
     render() {
         const { navigation } = this.props;
-        const { date } = this.state;
         return (
             <View style={{ flex: 1 }}>
-                <Text style={[styles.heading, { fontSize: 30, fontWeight: 'bold' }]}>{date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear() +
-                    " (" + date.getHours() + ":" + date.getMinutes() + ")"}</Text>
-                <Text style={styles.heading}>How did You Feeling:</Text>
+                <CustomeDate date={this.state.date}></CustomeDate>
+                <Text style={styles.heading}>How did You Feel:</Text>
                 <View style={styles.imgMainMoodGroup}>
-                    {this.displayMainMood()}
+                    < Image
+                        style={styles.imgMainMood}
+                        source={this.mainMoodImg()}
+                    />
                 </View>
-                    {this.displayAllMood()}
-                <View style={styles.bottomView}>
-                    <Button title="Go Back" style={styles.saveButton} onPress={() => navigation.navigate('Home')}></Button>
-                </View>
+                {this.displayAllMood()}
                 {this.location()}
             </View >
         );
@@ -300,6 +305,12 @@ const styles = StyleSheet.create({
         marginTop: 15,
         paddingStart: 15,
         paddingEnd: 15
+    },
+    moodImg: {
+        width: 30,
+        height: 30,
+        borderRadius: 90,
+        marginStart: 5
     },
 })
 

@@ -3,6 +3,8 @@ import { View, Text, Button, StyleSheet, Image, TouchableOpacity, LayoutAnimatio
 import Mood from '../models/Mood';
 import Location from '../models/Location';
 import Weather from '../models/Weather';
+import CustomeButton from '../widgets/CustomeButton';
+import CustomeDate from '../widgets/CustomeDate';
 
 
 const Realm = require('realm');
@@ -64,11 +66,9 @@ class MoodAdd extends Component {
     }
 
     render() {
-        const { date } = this.state;
         return (
             <View style={{ flex: 1 }}>
-                <Text style={[styles.heading, { fontSize: 30, fontWeight: 'bold' }]}>{date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear() +
-                    " (" + (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) + ":" + (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes()) + ")"}</Text>
+               <CustomeDate date={this.state.date}></CustomeDate>
                 <Text style={styles.heading}>How Are You Feeling?</Text>
                 <View style={styles.imgMainMoodGroup}>
                     <TouchableOpacity onPress={() => this.onPressMainMood(1)}>
@@ -141,11 +141,10 @@ class MoodAdd extends Component {
                         </TouchableOpacity>
                     </View>
                 </View>
-                <View style={styles.bottomView2}>
-                    <Button title="Add Reason" style={styles.navButon} onPress={() => this.onAddReasons()}></Button>
-                </View>
+               
                 <View style={styles.bottomView}>
-                    <Button title="Save Your Mood" style={[styles.navButon, { padding: 50 }]} onPress={() => this.onSaveMood()}></Button>
+                    <CustomeButton onPress={() => this.onAddReasons()} style={{marginBottom:5}}>Add Reason</CustomeButton>
+                    <CustomeButton onPress={() => this.onSaveMood()}>Save Your Mood</CustomeButton>
                 </View>
             </View >
         );
@@ -219,24 +218,15 @@ const styles = StyleSheet.create({
         width: 25,
         resizeMode: 'stretch',
     },
-    bottomView2: {
-        width: '100%',
-        height: 80,
-        justifyContent: 'center',
-        paddingEnd: 20,
-        paddingStart: 20,
-        position: 'absolute', //Here is the trick
-        bottom: 30, //Here is the trick
-    },
     bottomView: {
         width: '100%',
-        height: 60,
+        height: 150,
         justifyContent: 'center',
         paddingEnd: 20,
         paddingStart: 20,
         position: 'absolute', //Here is the trick
         bottom: 0, //Here is the trick
-    }
+    },
 })
 
 

@@ -6,5 +6,5 @@ npm install @react-native-community/geolocation --save
 change in \android\app\src\main
 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
-npm install --save rn-fetch-blob
-react-native link rn-fetch-blob
+npm install --save react-native-vector-icons
+npm install react-native-maps --save-exact

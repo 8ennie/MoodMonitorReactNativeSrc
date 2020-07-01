@@ -71,6 +71,10 @@ class Home extends Component {
                         onPress={() => navigation.navigate('Settings')}
                         style={styles.menuItem}
                     >Settings</Text>
+                    <Text
+                        onPress={() => navigation.navigate('MoodAnalysis')}
+                        style={styles.menuItem}
+                    >Moods Analysis</Text>
                 </View>
                 <View style={styles.menu}>
                     <Text

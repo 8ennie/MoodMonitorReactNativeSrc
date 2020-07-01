@@ -4,6 +4,9 @@ import Geolocation from '@react-native-community/geolocation';
 import Mood from '../models/Mood';
 import Location from '../models/Location';
 import Weather from '../models/Weather';
+import CustomeButton from '../widgets/CustomeButton';
+import CustomeDate from '../widgets/CustomeDate';
+import MapView, { Marker } from 'react-native-maps';
 const Realm = require('realm');
 
 class AddReason extends Component {
@@ -35,11 +38,9 @@ class AddReason extends Component {
 
 
     render() {
-        const { date } = this.state;
         return (
             <View style={{ flex: 1 }}>
-                <Text style={[{ textAlign: 'center', fontSize: 30, fontWeight: 'bold' }]}>{date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear() +
-                    " (" + (date.getHours() < 10 ? "0" + date.getHours() : date.getHours()) + ":" + (date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes()) + ")"}</Text>
+                <CustomeDate date={this.state.date}></CustomeDate>
                 <View style={styles.topBar}>
                     <Text style={styles.topBarText}>Main Feeling:</Text>
                     <Image
@@ -54,7 +55,7 @@ class AddReason extends Component {
                     {this.weather()}
                 </View>
                 <View style={styles.bottomView}>
-                    <Button title="Save Your Mood" style={[{ padding: 50 }]} onPress={() => this.onSaveMood()}></Button>
+                    <CustomeButton onPress={() => this.onSaveMood()}>Save Your Mood</CustomeButton>
                 </View>
             </View>
         )
@@ -63,6 +64,9 @@ class AddReason extends Component {
     changeLocationLayout = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         this.setState({ expandedLocation: !this.state.expandedLocation });
+    }
+    getCoordinate() {
+        return { lat: parseFloat(this.state.location.latitude), lng: parseFloat(this.state.location.longitude) }
     }
 
     location() {
@@ -76,17 +80,40 @@ class AddReason extends Component {
                         />
                     </TouchableOpacity>
                     <View style={{ height: this.state.expandedLocation ? null : 0, overflow: 'hidden' }}>
-                        <Text>{this.state.location.city}</Text>
-                        <Text>{this.state.location.country}</Text>
+                        <Text style={{ textAlign: 'center', fontSize: 20 }}>{this.state.location.city}, {this.state.location.country}</Text>
+
+                        <View style={{ height: 300, marginHorizontal: 15 }}>
+                            <MapView
+                                initialRegion={{
+                                    latitude: parseFloat(this.state.location.latitude),
+                                    longitude: parseFloat(this.state.location.longitude),
+                                    latitudeDelta: 0.0922,
+                                    longitudeDelta: 0.0421,
+                                }}
+                                style={{ ...StyleSheet.absoluteFillObject }}
+                            >
+                                <Marker
+                                    coordinate={{ latitude: parseFloat(this.state.location.latitude), longitude: parseFloat(this.state.location.longitude) }}
+                                    style={styles.mainMoodImg}
+                                >
+                                    <Image
+                                        style={styles.moodImg}
+                                        source={this.mainMoodImg()}
+                                    />
+                                </Marker>
+                            </MapView>
+                        </View>
+
+
                     </View>
+
                 </View>
             );
         }
 
     }
 
-
-    changeLocationWeather = () => {
+    changeWeatherLayout = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         this.setState({ expandedWeather: !this.state.expandedWeather });
     }
@@ -100,21 +127,21 @@ class AddReason extends Component {
         if (this.state.weather) {
             return (
                 <View>
-                    <TouchableOpacity activeOpacity={0.8} onPress={this.changeLocationWeather} style={styles.catagoryHeader}>
+                    <TouchableOpacity activeOpacity={0.8} onPress={this.changeWeatherLayout} style={styles.catagoryHeader}>
                         <Text style={styles.heading}>Weather</Text>
                         <Image style={styles.imgExpand}
                             source={this.state.expandedWeather ? require('../resources/images/expand_less_18dp.png') : require('../resources/images/expand_more_18dp.png')}
                         />
                     </TouchableOpacity>
                     <View style={{ height: this.state.expandedWeather ? null : 0, overflow: 'hidden' }}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 15 , alignItems:'center'}}>
-                            <Image style={{ width: 70, height: 70, backgroundColor: '#C0C0C0', borderRadius: 90 , borderWidth:1, borderColor: 'black'}}
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 15, alignItems: 'center' }}>
+                            <Image style={{ width: 70, height: 70, backgroundColor: '#C0C0C0', borderRadius: 90, borderWidth: 1, borderColor: 'black' }}
                                 source={this.getWeatherIcon()}
                             />
-                            <View style={{ justifyContent: 'center', alignItems:'center' }}>
-                                <Text style={{fontSize:20}}>Temp: {this.state.weather.temperatur} C</Text>
-                                <Text style={{fontSize:20}}>Desc: {this.state.weather.description}</Text>
-                                <Text style={{fontSize:20}}>{this.state.weather.clouds} % Clouds</Text>
+                            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                <Text style={{ fontSize: 20 }}>Temp: {this.state.weather.temperatur} C</Text>
+                                <Text style={{ fontSize: 20 }}>Desc: {this.state.weather.description}</Text>
+                                <Text style={{ fontSize: 20 }}>{this.state.weather.clouds} % Clouds</Text>
                             </View>
                         </View>
                     </View>
@@ -245,7 +272,7 @@ const styles = StyleSheet.create({
     },
     bottomView: {
         width: '100%',
-        height: 60,
+        height: 100,
         justifyContent: 'center',
         paddingEnd: 20,
         paddingStart: 20,

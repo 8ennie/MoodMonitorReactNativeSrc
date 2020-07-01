@@ -10,6 +10,7 @@ import ShowMood from './components/ShowMood';
 import AddReason from './components/AddReason';
 import Location from './models/Location';
 import Weather from './models/Weather';
+import MoodAnalysis from './components/MoodAnalysis';
 
 
 const Realm = require('realm');
@@ -50,7 +51,7 @@ class Main extends Component {
                     screenOptions={{
                         headerTitleAlign: 'center',
                         headerStyle: {
-                            backgroundColor: '#621FF7',
+                            backgroundColor: 'orange',
                         },
                         headerTintColor: '#fff',
                         headerTitleStyle: {
@@ -87,6 +88,11 @@ class Main extends Component {
                         name="AddReason"
                         component={AddReason}
                         options={{ title: 'Add Reasons' }}
+                    />
+                    <Stack.Screen
+                        name="MoodAnalysis"
+                        component={MoodAnalysis}
+                        options={{ title: 'Moods Analysis' }}
                     />
                 </Stack.Navigator>
             </NavigationContainer>
