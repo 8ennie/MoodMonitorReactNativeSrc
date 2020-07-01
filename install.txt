@@ -1,0 +1,10 @@
+npm install @react-navigation/native @react-navigation/stack
+npm install react-native-reanimated react-native-gesture-handler react-native-screens react-native-safe-area-context @react-native-community/masked-view
+npm install --save realm
+npm install --save react-native-location
+npm install @react-native-community/geolocation --save
+change in \android\app\src\main
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
+npm install --save rn-fetch-blob
+react-native link rn-fetch-blob
