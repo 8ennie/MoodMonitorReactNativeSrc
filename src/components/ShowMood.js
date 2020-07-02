@@ -39,11 +39,6 @@ class ShowMood extends Component {
             location: mood.location,
             weather: mood.weather
         };
-        console.log(mood);
-
-        console.log(this.state);
-        console.log(Platform.OS);
-        
         if (Platform.OS === 'android') {
             UIManager.setLayoutAnimationEnabledExperimental(true);
         }

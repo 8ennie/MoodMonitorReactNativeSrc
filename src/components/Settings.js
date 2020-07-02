@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { View, Text, StyleSheet } from 'react-native'
 import Mood from '../models/Mood';
+import Location from '../models/Location';
+import Weather from '../models/Weather';
 
 
 
@@ -28,7 +30,7 @@ class Settings extends Component {
 
 
     deleteAllMoods() {
-        let realm = new Realm({ schema: [Mood] });
+        let realm = new Realm({ schema: [Mood, Location, Weather] });
         realm.write (() =>{
             realm.deleteAll()
         });

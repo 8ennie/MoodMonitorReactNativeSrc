@@ -5,6 +5,16 @@ npm install --save react-native-location
 npm install @react-native-community/geolocation --save
 change in \android\app\src\main
 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-
+ <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 npm install --save react-native-vector-icons
+
+
+
 npm install react-native-maps --save-exact
+buildscript {
+    ext {
+		supportLibVersion   = "28.0.0"
+		playServicesVersion = "17.0.0" // or find latest version
+		androidMapsUtilsVersion = "2.0.1"
+    }
+}

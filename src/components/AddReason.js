@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, Image, Button, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native'
+import { NavigationActions, StackActions } from '@react-navigation/native';
+import { View, Text, StyleSheet, Image, Button, TouchableOpacity } from 'react-native'
 import Geolocation from '@react-native-community/geolocation';
 import Mood from '../models/Mood';
 import Location from '../models/Location';
@@ -7,23 +8,32 @@ import Weather from '../models/Weather';
 import CustomeButton from '../widgets/CustomeButton';
 import CustomeDate from '../widgets/CustomeDate';
 import MapView, { Marker } from 'react-native-maps';
+import ExpandPanel from '../widgets/ExpandPanel';
 const Realm = require('realm');
 
 class AddReason extends Component {
+    watchID = null;
     constructor(props) {
         super(props);
         this.state = {
             date: new Date(props.route.params.mood.date),
             mainMood: props.route.params.mood.mainMood,
             moods: props.route.params.mood.moods,
-            location: null
         };
         Geolocation.getCurrentPosition(info => {
-            this.fetchWeather(info.coords.latitude, info.coords.longitude)
-        });
-        if (Platform.OS === 'android') {
-            UIManager.setLayoutAnimationEnabledExperimental(true);
-        }
+            var location = {};
+            location.longitude = info.coords.longitude.toString();
+            location.latitude = info.coords.latitude.toString();
+            this.setState({ location: location })
+            this.fetchWeather()
+        }, error => {
+            console.log(error);
+        },
+            { enableHighAccuracy: false, timeout: 20000, maximumAge: 1000 });
+    }
+
+    componentWillUnmount() {
+        this.watchID != null && Geolocation.clearWatch(this.watchID);
     }
 
     mainMoodImg() {
@@ -49,73 +59,56 @@ class AddReason extends Component {
                     />
                     {this.allMoods()}
                 </View>
-                <View>
+                <ExpandPanel title="Location">
                     {this.location()}
-
+                </ExpandPanel>
+                <ExpandPanel title="Weather">
                     {this.weather()}
-                </View>
+                </ExpandPanel>
+
+
+
                 <View style={styles.bottomView}>
                     <CustomeButton onPress={() => this.onSaveMood()}>Save Your Mood</CustomeButton>
                 </View>
             </View>
         )
     }
-
-    changeLocationLayout = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        this.setState({ expandedLocation: !this.state.expandedLocation });
-    }
     getCoordinate() {
         return { lat: parseFloat(this.state.location.latitude), lng: parseFloat(this.state.location.longitude) }
     }
 
     location() {
-        if (this.state.location) {
+        if (this.state.location && this.state.location.longitude && this.state.location.latitude) {
             return (
-                <View>
-                    <TouchableOpacity activeOpacity={0.8} onPress={this.changeLocationLayout} style={styles.catagoryHeader}>
-                        <Text style={styles.heading}>Location</Text>
-                        <Image style={styles.imgExpand}
-                            source={this.state.expandedLocation ? require('../resources/images/expand_less_18dp.png') : require('../resources/images/expand_more_18dp.png')}
-                        />
-                    </TouchableOpacity>
-                    <View style={{ height: this.state.expandedLocation ? null : 0, overflow: 'hidden' }}>
-                        <Text style={{ textAlign: 'center', fontSize: 20 }}>{this.state.location.city}, {this.state.location.country}</Text>
-
-                        <View style={{ height: 300, marginHorizontal: 15 }}>
-                            <MapView
-                                initialRegion={{
-                                    latitude: parseFloat(this.state.location.latitude),
-                                    longitude: parseFloat(this.state.location.longitude),
-                                    latitudeDelta: 0.0922,
-                                    longitudeDelta: 0.0421,
-                                }}
-                                style={{ ...StyleSheet.absoluteFillObject }}
-                            >
-                                <Marker
-                                    coordinate={{ latitude: parseFloat(this.state.location.latitude), longitude: parseFloat(this.state.location.longitude) }}
-                                    style={styles.mainMoodImg}
-                                >
-                                    <Image
-                                        style={styles.moodImg}
-                                        source={this.mainMoodImg()}
-                                    />
-                                </Marker>
-                            </MapView>
-                        </View>
-
-
+                <View >
+                    <Text style={{ textAlign: 'center', fontSize: 20 }}>{this.state.location.city}, {this.state.location.country}</Text>
+                    <View style={{ height: 300, marginHorizontal: 15 }}>
+                        <MapView
+                            initialRegion={{
+                                latitude: parseFloat(this.state.location.latitude),
+                                longitude: parseFloat(this.state.location.longitude),
+                                latitudeDelta: 0.0922,
+                                longitudeDelta: 0.0421,
+                            }}
+                            style={{ ...StyleSheet.absoluteFillObject }}>
+                            <Marker
+                                coordinate={{ latitude: parseFloat(this.state.location.latitude), longitude: parseFloat(this.state.location.longitude) }}
+                                style={styles.mainMoodImg}>
+                                <Image
+                                    style={styles.moodImg}
+                                    source={this.mainMoodImg()}
+                                />
+                            </Marker>
+                        </MapView>
                     </View>
 
+
                 </View>
+
             );
         }
 
-    }
-
-    changeWeatherLayout = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        this.setState({ expandedWeather: !this.state.expandedWeather });
     }
 
     getWeatherIcon() {
@@ -127,25 +120,18 @@ class AddReason extends Component {
         if (this.state.weather) {
             return (
                 <View>
-                    <TouchableOpacity activeOpacity={0.8} onPress={this.changeWeatherLayout} style={styles.catagoryHeader}>
-                        <Text style={styles.heading}>Weather</Text>
-                        <Image style={styles.imgExpand}
-                            source={this.state.expandedWeather ? require('../resources/images/expand_less_18dp.png') : require('../resources/images/expand_more_18dp.png')}
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 15, alignItems: 'center' }}>
+                        <Image style={{ width: 70, height: 70, backgroundColor: '#C0C0C0', borderRadius: 90, borderWidth: 1, borderColor: 'black' }}
+                            source={this.getWeatherIcon()}
                         />
-                    </TouchableOpacity>
-                    <View style={{ height: this.state.expandedWeather ? null : 0, overflow: 'hidden' }}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 15, alignItems: 'center' }}>
-                            <Image style={{ width: 70, height: 70, backgroundColor: '#C0C0C0', borderRadius: 90, borderWidth: 1, borderColor: 'black' }}
-                                source={this.getWeatherIcon()}
-                            />
-                            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                                <Text style={{ fontSize: 20 }}>Temp: {this.state.weather.temperatur} C</Text>
-                                <Text style={{ fontSize: 20 }}>Desc: {this.state.weather.description}</Text>
-                                <Text style={{ fontSize: 20 }}>{this.state.weather.clouds} % Clouds</Text>
-                            </View>
+                        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                            <Text style={{ fontSize: 20 }}>Temp: {this.state.weather.temperatur} C</Text>
+                            <Text style={{ fontSize: 20 }}>Desc: {this.state.weather.description}</Text>
+                            <Text style={{ fontSize: 20 }}>{this.state.weather.clouds} % Clouds</Text>
                         </View>
                     </View>
                 </View>
+
             );
         }
 
@@ -194,16 +180,14 @@ class AddReason extends Component {
         );
     }
 
-    fetchWeather(lat, lon) {
+    fetchWeather() {
         const API_KEY = "b884c72a7f69d65a331f083948fa44e6";
         fetch(
-            `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&APPID=${API_KEY}&units=metric`
+            `http://api.openweathermap.org/data/2.5/weather?lat=${this.state.location.latitude}&lon=${this.state.location.longitude}&APPID=${API_KEY}&units=metric`
         )
             .then(res => res.json())
             .then(weatherData => {
-                var location = new Location();
-                location.longitude = weatherData.coord.lon.toString();
-                location.latitude = weatherData.coord.lat.toString();
+                var location = this.state.location;
                 location.city = weatherData.name;
                 location.country = weatherData.sys.country;
                 this.setState({ location: location });
@@ -227,19 +211,13 @@ class AddReason extends Component {
         let realm = new Realm({ schema: [Mood, Location, Weather] });
         realm.write(() => {
             let mood = realm.create('Mood', { id: realm.objects('Mood').length + 1, mainMood: this.state.mainMood, moods: this.state.moods, note: this.state.note, date: this.state.date });
-            var location = this.state.location;
-            location.id = realm.objects('Location').length + 1;
-            mood.location = location;
-            //realm.create('Location', location);
-
+            mood.location = realm.create('Location', { ...this.state.location, id: realm.objects('Location').length + 1 });
         });
         realm.close();
-
-        this.props.navigation.navigate('Home')
+        this.props.navigation.navigate('Home');
     }
+
 }
-
-
 
 const styles = StyleSheet.create({
     topBarText: {

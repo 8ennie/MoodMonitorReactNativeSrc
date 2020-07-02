@@ -9,7 +9,7 @@ class MoodHistory extends Component {
     realm = new Realm({ schema: [Mood, Location, Weather] });
     constructor(props) {
         super(props);
-        
+
         this.state = {
             moods: this.realm.objects('Mood'),
         };
@@ -19,7 +19,7 @@ class MoodHistory extends Component {
 
     }
 
-    componentWillUnmount(){
+    componentWillUnmount() {
         this.realm.close();
     }
 
@@ -55,7 +55,6 @@ function getMainMoodImage(mainMood) {
 }
 
 function ListItem({ mood, navigation }) {
-
     return (
         <TouchableOpacity style={styles.listItem} onPress={() => navigation.navigate('ShowMood', { moodId: mood.id })} >
             <Text style={styles.title}>{mood.date.getDate() + "/" + (mood.date.getMonth() + 1) + "/" + mood.date.getFullYear() +
