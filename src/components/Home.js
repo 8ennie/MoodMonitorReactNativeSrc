@@ -3,6 +3,7 @@ import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity } from 'react
 import Mood from '../models/Mood';
 import Weather from '../models/Weather';
 import Location from '../models/Location';
+import MenuButton from '../widgets/MenuButton';
 
 const Realm = require('realm');
 
@@ -43,7 +44,7 @@ class Home extends Component {
                 oldDate = date;
             }
         });
-        if(count != 0){
+        if (count != 0) {
             avgMoods.push({ date: new Date(oldDate), avgMood: (avgMood / count) });
         }
         return avgMoods;
@@ -52,30 +53,33 @@ class Home extends Component {
     render() {
         const { navigation } = this.props;
         return (
-            <View style={{ flex: 1 }}>
-
-                <View style={styles.menu}>
-                    <Text
-                        style={styles.header}
-                    >Main Menu</Text>
-
-                    <Text
+            <View >
+                <View style= {{flexDirection:'row', justifyContent:'space-around', marginVertical:20}}>
+                    <MenuButton
+                        lable="Add Mood"
+                        imageSource={require('../resources/images/add_mood.png')}
                         onPress={() => navigation.navigate('MoodAdd')}
-                        style={styles.menuItem}
-                    >Add a Mood</Text>
-                    <Text
+                    />
+                    <MenuButton
+                        lable="History"
+                        imageSource={require('../resources/images/history_icon.png')}
                         onPress={() => navigation.navigate('MoodHistory')}
-                        style={styles.menuItem}
-                    >Mood History</Text>
-                    <Text
-                        onPress={() => navigation.navigate('Settings')}
-                        style={styles.menuItem}
-                    >Settings</Text>
-                    <Text
-                        onPress={() => navigation.navigate('MoodAnalysis')}
-                        style={styles.menuItem}
-                    >Moods Analysis</Text>
+                    />
                 </View>
+                <View style= {{flexDirection:'row', justifyContent:'space-around'}}>
+                <MenuButton
+                        lable="Analysis"
+                        imageSource={require('../resources/images/analysis_icon.png')}
+                        onPress={() => navigation.navigate('MoodAnalysis')}
+                    />
+                    <MenuButton
+                        lable="Settings"
+                        imageSource={require('../resources/images/settings_icon.png')}
+                        onPress={() => navigation.navigate('Settings')}
+                    />
+                </View>
+
+
                 <View style={styles.menu}>
                     <Text
                         style={styles.header}
@@ -97,10 +101,10 @@ class Home extends Component {
 
 
 
-function getMainMoodImage(avgMood) {  
-    if (avgMood <= 1+(2 / 3)) {
+function getMainMoodImage(avgMood) {
+    if (avgMood <= 1 + (2 / 3)) {
         return require('../resources/images/sad_icon.png');
-    } else if (avgMood <= 1+2 * (2 / 3)) {
+    } else if (avgMood <= 1 + 2 * (2 / 3)) {
         return require('../resources/images/normal_icon.png');
     } else if (avgMood <= 3) {
         return require('../resources/images/happy_icon.png');
@@ -170,7 +174,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
 
 
-    }
+    },
 })
 
 

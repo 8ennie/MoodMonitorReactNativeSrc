@@ -62,7 +62,7 @@ class Main extends Component {
                     <Stack.Screen
                         name="Home"
                         component={Home}
-                        options={{ title: 'Home' }}
+                        options={{ title: 'Mood Monitor' }}
                     />
                     <Stack.Screen
                         name="MoodAdd"

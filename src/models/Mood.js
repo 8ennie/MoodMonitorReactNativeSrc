@@ -9,7 +9,7 @@ Mood.schema = {
         id: 'int',
         date: 'date',
         mainMood: 'int',
-        moods: 'int?[]',
+        emotions: 'string?[]',
         note: 'string?',
         location: 'Location',
         weather: 'Weather',

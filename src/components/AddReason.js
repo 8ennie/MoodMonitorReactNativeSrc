@@ -9,6 +9,7 @@ import CustomeButton from '../widgets/CustomeButton';
 import CustomeDate from '../widgets/CustomeDate';
 import MapView, { Marker } from 'react-native-maps';
 import ExpandPanel from '../widgets/ExpandPanel';
+import Emotions from '../models/Emotions';
 const Realm = require('realm');
 
 class AddReason extends Component {
@@ -18,7 +19,7 @@ class AddReason extends Component {
         this.state = {
             date: new Date(props.route.params.mood.date),
             mainMood: props.route.params.mood.mainMood,
-            moods: props.route.params.mood.moods,
+            emotions: props.route.params.mood.emotions,
         };
         Geolocation.getCurrentPosition(info => {
             var location = {};
@@ -57,7 +58,7 @@ class AddReason extends Component {
                         style={styles.moodImg}
                         source={this.mainMoodImg()}
                     />
-                    {this.allMoods()}
+                    {this.allEmotions()}
                 </View>
                 <ExpandPanel title="Location">
                     {this.location()}
@@ -102,8 +103,6 @@ class AddReason extends Component {
                             </Marker>
                         </MapView>
                     </View>
-
-
                 </View>
 
             );
@@ -138,46 +137,21 @@ class AddReason extends Component {
     }
 
 
-
-    allMoods() {
-        if (this.state.moods.length > 0) {
-            const moods = [];
-            moods.push(<Text key="Header" style={[styles.topBarText, { marginStart: 15 }]}>Moods:</Text>);
-            this.state.moods.forEach(mood => {
-                moods.push(this.displayMood(mood));
-            });
-            return moods;
+    allEmotions() {
+        if (this.state.emotions.length > 0) {
+            return (
+                <View style={{flexDirection:'row'}} >
+                    <Text key="Header" style={[styles.topBarText, { marginStart: 15 }]}>Emotions:</Text>
+                    {this.state.emotions.map(feeltEmotion =>
+                        <Image
+                            key={feeltEmotion}
+                            style={styles.moodImg}
+                            source={Emotions.find(emotion => emotion.name == feeltEmotion).iconSource}
+                        />)
+                    }
+                </View>
+            );
         }
-    }
-
-    displayMood(mood) {
-        let imgUrl;
-        if (mood == 1) {
-            imgUrl = require('../resources/images/angry_icon.png');
-        }
-        if (mood == 2) {
-            imgUrl = require('../resources/images/sad_crying_icon.jpg');
-        }
-        if (mood == 3) {
-            imgUrl = require('../resources/images/happy_smiley_icon.jpg');
-        }
-        if (mood == 4) {
-            imgUrl = require('../resources/images/tired_icon.jpg');
-        }
-        if (mood == 5) {
-            imgUrl = require('../resources/images/scared_icon.png');
-        }
-        if (mood == 6) {
-            imgUrl = require('../resources/images/loved_icon.jpg');
-        }
-
-        return (
-            <Image
-                key={mood}
-                style={styles.moodImg}
-                source={imgUrl}
-            />
-        );
     }
 
     fetchWeather() {
@@ -192,7 +166,7 @@ class AddReason extends Component {
                 location.country = weatherData.sys.country;
                 this.setState({ location: location });
 
-                var weather = new Weather
+                var weather = {};
                 weather.temperatur = weatherData.main.temp;
                 weather.clouds = weatherData.clouds.all;
                 if (weatherData.rain) {
@@ -200,8 +174,8 @@ class AddReason extends Component {
                 }
                 weather.description = weatherData.weather[0].description;
                 weather.icon = weatherData.weather[0].icon;
-                weather.sunrise = weatherData.sys.sunrise;
-                weather.sunset = weatherData.sys.sunset;
+                weather.sunrise = new Date(weatherData.sys.sunrise);
+                weather.sunset = new Date(weatherData.sys.sunset);
                 this.setState({ weather: weather });
             });
     }
@@ -210,8 +184,9 @@ class AddReason extends Component {
     onSaveMood() {
         let realm = new Realm({ schema: [Mood, Location, Weather] });
         realm.write(() => {
-            let mood = realm.create('Mood', { id: realm.objects('Mood').length + 1, mainMood: this.state.mainMood, moods: this.state.moods, note: this.state.note, date: this.state.date });
+            let mood = realm.create('Mood', { id: realm.objects('Mood').length + 1, mainMood: this.state.mainMood, emotions: this.state.emotions, note: this.state.note, date: this.state.date });
             mood.location = realm.create('Location', { ...this.state.location, id: realm.objects('Location').length + 1 });
+            mood.weather = realm.create('Weather', { ...this.state.weather, id: realm.objects('Weather').length + 1 });
         });
         realm.close();
         this.props.navigation.navigate('Home');

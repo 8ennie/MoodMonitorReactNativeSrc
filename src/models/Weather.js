@@ -15,7 +15,7 @@ Weather.schema = {
     properties: {
         id: 'int',
         clouds: 'int',
-        rain: 'float',
+        rain: 'float?',
         icon: 'string',
         description: 'string',
         temperatur: 'int',

@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
-import { View, Text, Button, StyleSheet, Image, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native'
+import { View, Text, Button, StyleSheet, Image, TouchableOpacity, LayoutAnimation, Platform, UIManager, FlatList } from 'react-native'
 import Mood from '../models/Mood';
 import Location from '../models/Location';
 import Weather from '../models/Weather';
 import CustomeButton from '../widgets/CustomeButton';
 import CustomeDate from '../widgets/CustomeDate';
+import MenuButton from '../widgets/MenuButton';
+import Emotions from '../models/Emotions';
+import { add } from 'react-native-reanimated';
 
 
 const Realm = require('realm');
@@ -14,7 +17,7 @@ class MoodAdd extends Component {
     state = {
         date: new Date(),
         mainMood: 3,
-        moods: [],
+        emotions: [],
         expandedMood: false,
         note: "",
     }
@@ -39,36 +42,35 @@ class MoodAdd extends Component {
     }
 
 
-    onPressMood(mood) {
-        var newMoods = this.state.moods;
-        if (newMoods.includes(mood)) {
-            newMoods.splice(newMoods.indexOf(mood), 1);
+    onPressMood(emotion) {        
+        var newEmotions = this.state.emotions;
+        if (newEmotions.includes(emotion)) {
+            newEmotions.splice(newEmotions.indexOf(emotion), 1);
         } else {
-            newMoods.push(mood);
+            newEmotions.push(emotion);
         }
         this.setState({
-            moods: newMoods
+            emotions: newEmotions
         })
     }
 
     onSaveMood() {
         let realm = new Realm({ schema: [Mood, Location, Weather] });
         realm.write(() => {
-            realm.create('Mood', { id: realm.objects('Mood').length + 1, mainMood: this.state.mainMood, moods: this.state.moods, note: this.state.note, date: this.state.date });
+            realm.create('Mood', { id: realm.objects('Mood').length + 1, mainMood: this.state.mainMood, emotions: this.state.emotions, note: this.state.note, date: this.state.date });
         });
         realm.close();
-
         this.props.navigation.navigate('Home')
     }
 
     onAddReasons() {
-        this.props.navigation.navigate('AddReason', { mood: { mainMood: this.state.mainMood , moods: this.state.moods, date: this.state.date.getTime() } })
+        this.props.navigation.navigate('AddReason', { mood: { mainMood: this.state.mainMood, emotions: this.state.emotions, date: this.state.date.getTime() } })
     }
 
     render() {
         return (
             <View style={{ flex: 1 }}>
-               <CustomeDate date={this.state.date}></CustomeDate>
+                <CustomeDate date={this.state.date}></CustomeDate>
                 <Text style={styles.heading}>How Are You Feeling?</Text>
                 <View style={styles.imgMainMoodGroup}>
                     <TouchableOpacity onPress={() => this.onPressMainMood(1)}>
@@ -91,67 +93,35 @@ class MoodAdd extends Component {
                     </TouchableOpacity>
                 </View>
 
-                <Text style={[styles.heading, { marginTop: 50, marginBottom: 5 }]}>In what Mood are you?</Text>
-                <View >
-                    <View style={[styles.imgMoodGroup]}>
-                        <TouchableOpacity onPress={() => this.onPressMood(1)}>
-                            <Image
-                                style={this.state.moods.includes(1) ? styles.imgMoodSelected : styles.imgMood}
-                                source={require('../resources/images/angry_icon.png')}
+                <Text style={[styles.heading, { marginTop: 25, marginBottom: 10 }]}>What Emotoion are you feeling?</Text>
+                <View style={styles.emotionsList}>
+                    <FlatList
+                        data={Emotions}
+                        style={{ height: 200 }}
+                        renderItem={({ item }) =>
+                            <MenuButton
+                                lable={item.name}
+                                imageSource={item.iconSource}
+                                onPress={() => this.onPressMood(item.name)}
+                                style={{ width: 90, height: 90}}
+                                imageStyle={styles.imgEmotion}
+                                textStyle={this.state.emotions.includes(item.name) ? { fontSize: 20, color: 'orange', fontWeight: 'normal' } : { fontSize: 20, color: 'black', fontWeight: 'normal' }}
                             />
-                            <Text style={styles.moodDesc}>Angry</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => this.onPressMood(2)}>
-                            <Image
-                                style={this.state.moods.includes(2) ? styles.imgMoodSelected : styles.imgMood}
-                                source={require('../resources/images/sad_crying_icon.jpg')}
-                            />
-                            <Text style={styles.moodDesc}>Sad</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => this.onPressMood(3)}>
-                            <Image
-                                style={this.state.moods.includes(3) ? styles.imgMoodSelected : styles.imgMood}
-                                source={require('../resources/images/happy_smiley_icon.jpg')}
-                            />
-                            <Text style={styles.moodDesc}>Happy</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    <View style={[styles.imgMoodGroup]}>
-                        <TouchableOpacity onPress={() => this.onPressMood(4)}>
-                            <Image
-                                style={this.state.moods.includes(4) ? styles.imgMoodSelected : styles.imgMood}
-                                source={require('../resources/images/tired_icon.jpg')}
-                            />
-                            <Text style={styles.moodDesc}>Tired</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => this.onPressMood(5)}>
-                            <Image
-                                style={this.state.moods.includes(5) ? styles.imgMoodSelected : styles.imgMood}
-                                source={require('../resources/images/scared_icon.png')}
-                            />
-                            <Text style={styles.moodDesc}>Scared</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => this.onPressMood(6)}>
-                            <Image
-                                style={this.state.moods.includes(6) ? styles.imgMoodSelected : styles.imgMood}
-                                source={require('../resources/images/loved_icon.jpg')}
-                            />
-                            <Text style={styles.moodDesc}>Loved</Text>
-                        </TouchableOpacity>
-                    </View>
+                        } 
+                        keyExtractor={item => item.name} 
+                        horizontal={false}
+                        numColumns={3}
+                    />
                 </View>
-               
+
                 <View style={styles.bottomView}>
-                    <CustomeButton onPress={() => this.onAddReasons()} style={{marginBottom:5}}>Add Reason</CustomeButton>
+                    <CustomeButton onPress={() => this.onAddReasons()} style={{ marginBottom: 5 }}>Add Reason</CustomeButton>
                     <CustomeButton onPress={() => this.onSaveMood()}>Save Your Mood</CustomeButton>
                 </View>
             </View >
         );
     }
-    moodSelected(mood) {
-        return this.state.moods.includes(mood);
-    }
+   
 }
 
 
@@ -173,7 +143,6 @@ const styles = StyleSheet.create({
         margin: 3,
         resizeMode: 'stretch',
         borderRadius: 90,
-
     },
     imgMainMoodSelected: {
         height: 120,
@@ -182,41 +151,12 @@ const styles = StyleSheet.create({
         resizeMode: 'stretch',
         borderRadius: 90
     },
-    imgMoodGroup: {
-        flexDirection: 'row',
-        justifyContent: 'space-evenly',
+    emotionsList: {
+        justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 15,
     },
-    imgMood: {
-        height: 50,
-        width: 50,
-        margin: 3,
-        resizeMode: 'stretch',
+    imgEmotion: {
         borderRadius: 90,
-        borderColor: 'red',
-        borderWidth: 0,
-        marginEnd: 10,
-        marginStart: 10,
-    },
-    imgMoodSelected: {
-        height: 50,
-        width: 50,
-        margin: 3,
-        resizeMode: 'stretch',
-        borderRadius: 90,
-        borderColor: 'red',
-        borderWidth: 2,
-        marginEnd: 10,
-        marginStart: 10,
-    },
-    moodDesc: {
-        textAlign: 'center'
-    },
-    imgExpand: {
-        height: 25,
-        width: 25,
-        resizeMode: 'stretch',
     },
     bottomView: {
         width: '100%',
