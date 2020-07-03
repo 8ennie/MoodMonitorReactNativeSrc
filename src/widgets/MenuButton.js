@@ -36,6 +36,8 @@ const styles = StyleSheet.create({
     img: {
         height: '75%',
         width: '75%',
+        borderRadius:90,
+        resizeMode:'contain'
     }
 })
 export default MenuButton;

@@ -11,8 +11,8 @@ Mood.schema = {
         mainMood: 'int',
         emotions: 'string?[]',
         note: 'string?',
-        location: 'Location',
-        weather: 'Weather',
+        location: 'Location?',
+        weather: 'Weather?',
     }
 };
 

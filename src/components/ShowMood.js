@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
-import { View, Text, Button, StyleSheet, Image, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native'
+import { View, Text, Button, StyleSheet, Image, TouchableOpacity, FlatList } from 'react-native'
 import Mood from '../models/Mood';
 import Location from '../models/Location';
 import Weather from '../models/Weather';
 import CustomeDate from '../widgets/CustomeDate';
+import ExpandPanel from '../widgets/ExpandPanel';
 import MapView, { Marker } from 'react-native-maps';
+import Emotions from '../models/Emotions';
+import MenuButton from '../widgets/MenuButton';
 
 
 const Realm = require('realm');
@@ -14,18 +17,11 @@ class ShowMood extends Component {
     state = {
         date: new Date(),
         mainMood: 3,
-        moods: [],
-        expandedMood: false,
+        emotions: [],
         note: "",
         location: {},
         weather: {},
     }
-
-    changeLayout = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        this.setState({ expandedMood: !this.state.expandedMood });
-    }
-
 
     constructor(props) {
         super(props);
@@ -34,67 +30,31 @@ class ShowMood extends Component {
         this.state = {
             date: mood.date,
             mainMood: mood.mainMood,
-            moods: mood.moods.map(m => m),
+            emotions: mood.emotions.map(e => e),
             note: mood.note,
             location: mood.location,
             weather: mood.weather
         };
-        if (Platform.OS === 'android') {
-            UIManager.setLayoutAnimationEnabledExperimental(true);
-        }
-    }
-    onPressMainMood(newMood) {
-        if (this.state.edit) {
-            this.setState({
-                mainMood: newMood
-            })
-        }
-    }
-    changeLocationLayout = () => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        this.setState({ expandedLocation: !this.state.expandedLocation });
     }
 
-    location() {
-        if (this.state.location) {
-            return (
-                <View>
-                    <TouchableOpacity activeOpacity={0.8} onPress={this.changeLocationLayout} style={styles.catagoryHeader}>
-                        <Text style={styles.heading}>Location</Text>
-                        <Image style={styles.imgExpand}
-                            source={this.state.expandedLocation ? require('../resources/images/expand_less_18dp.png') : require('../resources/images/expand_more_18dp.png')}
-                        />
-                    </TouchableOpacity>
-                    <View style={{ height: this.state.expandedLocation ? null : 0, overflow: 'hidden' }}>
-                        <Text style={{ textAlign: 'center', fontSize: 20 }}>{this.state.location.city}, {this.state.location.country}</Text>
-
-                        <View style={{ height: 300, marginHorizontal: 15 }}>
-                            <MapView
-                                initialRegion={{
-                                    latitude: parseFloat(this.state.location.latitude),
-                                    longitude: parseFloat(this.state.location.longitude),
-                                    latitudeDelta: 0.0922,
-                                    longitudeDelta: 0.0421,
-                                }}
-                                style={{ ...StyleSheet.absoluteFillObject }}
-                            >
-                                <Marker
-                                    coordinate={{ latitude: parseFloat(this.state.location.latitude), longitude: parseFloat(this.state.location.longitude) }}
-                                    style={styles.mainMoodImg}
-                                >
-                                    <Image
-                                        style={styles.moodImg}
-                                        source={this.mainMoodImg()}
-                                    />
-                                </Marker>
-                            </MapView>
-                        </View>
-                    </View>
+    render() {
+        return (
+            <View style={{ flex: 1 }}>
+                <CustomeDate date={this.state.date} time></CustomeDate>
+                <Text style={styles.heading}>How did You Feel:</Text>
+                <View style={styles.imgMainMoodGroup}>
+                    < Image
+                        style={styles.imgMainMood}
+                        source={this.mainMoodImg()}
+                    />
                 </View>
-            );
-        }
-    }
 
+                {this.emotions()}
+                {this.location()}
+                {this.weather()}
+            </View >
+        );
+    }
     mainMoodImg() {
         if (this.state.mainMood == 1) {
             return require('../resources/images/sad_icon.png')
@@ -105,132 +65,97 @@ class ShowMood extends Component {
         }
     }
 
-    onPressMood(mood) {
-        if (this.state.edit) {
-            var newMoods = this.state.moods;
-            if (newMoods.includes(mood)) {
-                newMoods.splice(newMoods.indexOf(mood), 1);
-            } else {
-                newMoods.push(mood);
-            }
-            this.setState({
-                moods: newMoods
-            })
-        }
-    }
-
-    displayMood(mood) {
-        if (mood == 1) {
+    emotions() {
+        if (this.state.emotions.length > 0) {
+            let data = [];
+            this.state.emotions.forEach(e => {
+                data.push(Emotions.find(em => em.name == e));
+            });
             return (
-                <View>
-                    <Image
-                        style={styles.imgMood}
-                        source={require('../resources/images/angry_icon.png')}
-                    />
-                    <Text style={styles.moodDesc}>Angry</Text>
-                </View>
-            );
-        }
-        if (mood == 2) {
-            return (
-                <View>
-                    <Image
-                        style={styles.imgMood}
-                        source={require('../resources/images/sad_crying_icon.jpg')}
-                    />
-                    <Text style={styles.moodDesc}>Sad</Text>
-                </View>
-            );
-        }
-        if (mood == 3) {
-            return (
-                <View>
-                    <Image
-                        style={styles.imgMood}
-                        source={require('../resources/images/happy_smiley_icon.jpg')}
-                    />
-                    <Text style={styles.moodDesc}>Happy</Text>
-                </View>
-            );
-        }
-        if (mood == 4) {
-            return (
-                <View>
-                    <Image
-                        style={styles.imgMood}
-                        source={require('../resources/images/tired_icon.jpg')}
-                    />
-                    <Text style={styles.moodDesc}>Tired</Text>
-                </View>
-            );
-        }
-        if (mood == 5) {
-            return (
-                <View>
-                    <Image
-                        style={styles.imgMood}
-                        source={require('../resources/images/scared_icon.png')}
-                    />
-                    <Text style={styles.moodDesc}>Scared</Text>
-                </View>
-            );
-        }
-        if (mood == 6) {
-            return (
-                <View>
-                    <Image
-                        style={styles.imgMood}
-                        source={require('../resources/images/loved_icon.jpg')}
-                    />
-                    <Text style={styles.moodDesc}>Loved</Text>
-                </View>
-            );
-        }
-    }
-
-    displayAllMood() {
-        if (this.state.moods.length != 0) {
-            return (
-                <View>
-                    <TouchableOpacity activeOpacity={0.8} onPress={this.changeLayout} style={styles.catagoryHeader}>
-                        <Text style={styles.heading}>In what Mood are you?</Text>
-                        <Image style={styles.imgExpand}
-                            source={this.state.expandedMood ? require('../resources/images/expand_less_18dp.png') : require('../resources/images/expand_more_18dp.png')}
+                <ExpandPanel title="Emotions">
+                    <View style={{ alignItems: 'center' }}>
+                        <FlatList
+                            data={data}
+                            style={{ maxHeight: 200 }}
+                            renderItem={({ item }) =>
+                                <MenuButton
+                                    lable={item.name}
+                                    imageSource={item.iconSource}
+                                    style={{ width: 90, height: 90 }}
+                                    imageStyle={{ borderRadius: 90 }}
+                                    textStyle={{ fontSize: 18, color: 'black', fontWeight: 'normal' }}
+                                />
+                            }
+                            keyExtractor={item => item.name}
+                            horizontal={false}
+                            numColumns={3}
                         />
-                    </TouchableOpacity>
-                    <View style={{ height: this.state.expandedMood ? null : 0, overflow: 'hidden' }}>
-                        <View style={[styles.imgMoodGroup]}>
-                            {this.state.moods.includes(1) ? this.displayMood(1) : null}
-                            {this.state.moods.includes(2) ? this.displayMood(2) : null}
-                            {this.state.moods.includes(3) ? this.displayMood(3) : null}
-                            {this.state.moods.includes(4) ? this.displayMood(4) : null}
-                            {this.state.moods.includes(5) ? this.displayMood(5) : null}
-                            {this.state.moods.includes(6) ? this.displayMood(6) : null}
+                    </View>
+                </ExpandPanel>
+            );
+        }
+    }
+
+
+    location() {
+        if (this.state.location) {
+            return (
+
+                <ExpandPanel title="Location">
+                    <View>
+                        <Text style={{ textAlign: 'center', fontSize: 20 }}>{this.state.location.city}, {this.state.location.country}</Text>
+                        <View style={{ height: 300, marginHorizontal: 15 }}>
+                            <MapView
+                                initialRegion={{
+                                    latitude: parseFloat(this.state.location.latitude),
+                                    longitude: parseFloat(this.state.location.longitude),
+                                    latitudeDelta: 0.0922,
+                                    longitudeDelta: 0.0421,
+                                }}
+                                style={{ ...StyleSheet.absoluteFillObject }}>
+                                <Marker
+                                    coordinate={{ latitude: parseFloat(this.state.location.latitude), longitude: parseFloat(this.state.location.longitude) }}>
+                                    <Image
+                                        style={styles.moodImg}
+                                        source={this.mainMoodImg()}
+                                    />
+                                </Marker>
+                            </MapView>
                         </View>
                     </View>
-                </View>
+                </ExpandPanel>
+
+            );
+        }
+    }
+
+    weather() {
+        if (this.state.weather) {
+            return (
+                <ExpandPanel title="Weather">
+                    <View>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 15, alignItems: 'center' }}>
+                            <Image style={{ width: 70, height: 70, backgroundColor: '#C0C0C0', borderRadius: 90, borderWidth: 1, borderColor: 'black' }}
+                                source={this.getWeatherIcon()}
+                            />
+                            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                <Text style={{ fontSize: 20 }}>Temp: {this.state.weather.temperatur} C</Text>
+                                <Text style={{ fontSize: 20 }}>Desc: {this.state.weather.description}</Text>
+                                <Text style={{ fontSize: 20 }}>{this.state.weather.clouds} % Clouds</Text>
+                            </View>
+                        </View>
+                    </View>
+                </ExpandPanel>
             );
         }
 
     }
 
-    render() {
-        const { navigation } = this.props;
-        return (
-            <View style={{ flex: 1 }}>
-                <CustomeDate date={this.state.date}></CustomeDate>
-                <Text style={styles.heading}>How did You Feel:</Text>
-                <View style={styles.imgMainMoodGroup}>
-                    < Image
-                        style={styles.imgMainMood}
-                        source={this.mainMoodImg()}
-                    />
-                </View>
-                {this.displayAllMood()}
-                {this.location()}
-            </View >
-        );
+     getWeatherIcon() {
+        const imgUrl = 'https://openweathermap.org/img/wn/' + this.state.weather.icon + '@2x.png'
+        return { uri: imgUrl }
     }
+
 }
 
 
@@ -252,54 +177,6 @@ const styles = StyleSheet.create({
         margin: 3,
         resizeMode: 'stretch',
         borderRadius: 90,
-
-    },
-    imgMoodGroup: {
-        flexDirection: 'row',
-        justifyContent: 'space-evenly',
-        alignItems: 'center',
-        marginTop: 15,
-    },
-    imgMood: {
-        height: 50,
-        width: 50,
-        margin: 3,
-        resizeMode: 'stretch',
-        borderRadius: 90,
-        borderColor: 'red',
-        borderWidth: 0,
-        marginEnd: 10,
-        marginStart: 10,
-    },
-    moodDesc: {
-        textAlign: 'center'
-    },
-    imgExpand: {
-        height: 25,
-        width: 25,
-        resizeMode: 'stretch',
-    },
-    saveButton: {
-        flex: 1,
-        justifyContent: 'flex-end',
-        marginBottom: 36
-    },
-    bottomView: {
-        width: '100%',
-        height: 50,
-        justifyContent: 'center',
-        paddingEnd: 20,
-        paddingStart: 20,
-        position: 'absolute', //Here is the trick
-        bottom: 0, //Here is the trick
-    },
-    catagoryHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginTop: 15,
-        paddingStart: 15,
-        paddingEnd: 15
     },
     moodImg: {
         width: 30,

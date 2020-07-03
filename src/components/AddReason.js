@@ -27,26 +27,8 @@ class AddReason extends Component {
             location.latitude = info.coords.latitude.toString();
             this.setState({ location: location })
             this.fetchWeather()
-        }, error => {
-            console.log(error);
-        },
-            { enableHighAccuracy: false, timeout: 20000, maximumAge: 1000 });
+        });
     }
-
-    componentWillUnmount() {
-        this.watchID != null && Geolocation.clearWatch(this.watchID);
-    }
-
-    mainMoodImg() {
-        if (this.state.mainMood == 1) {
-            return require('../resources/images/sad_icon.png')
-        } else if (this.state.mainMood == 2) {
-            return require('../resources/images/normal_icon.png')
-        } else if (this.state.mainMood == 3) {
-            return require('../resources/images/happy_icon.png')
-        }
-    }
-
 
     render() {
         return (
@@ -60,14 +42,9 @@ class AddReason extends Component {
                     />
                     {this.allEmotions()}
                 </View>
-                <ExpandPanel title="Location">
-                    {this.location()}
-                </ExpandPanel>
-                <ExpandPanel title="Weather">
-                    {this.weather()}
-                </ExpandPanel>
 
-
+                {this.location()}
+                {this.weather()}
 
                 <View style={styles.bottomView}>
                     <CustomeButton onPress={() => this.onSaveMood()}>Save Your Mood</CustomeButton>
@@ -75,72 +52,21 @@ class AddReason extends Component {
             </View>
         )
     }
-    getCoordinate() {
-        return { lat: parseFloat(this.state.location.latitude), lng: parseFloat(this.state.location.longitude) }
-    }
 
-    location() {
-        if (this.state.location && this.state.location.longitude && this.state.location.latitude) {
-            return (
-                <View >
-                    <Text style={{ textAlign: 'center', fontSize: 20 }}>{this.state.location.city}, {this.state.location.country}</Text>
-                    <View style={{ height: 300, marginHorizontal: 15 }}>
-                        <MapView
-                            initialRegion={{
-                                latitude: parseFloat(this.state.location.latitude),
-                                longitude: parseFloat(this.state.location.longitude),
-                                latitudeDelta: 0.0922,
-                                longitudeDelta: 0.0421,
-                            }}
-                            style={{ ...StyleSheet.absoluteFillObject }}>
-                            <Marker
-                                coordinate={{ latitude: parseFloat(this.state.location.latitude), longitude: parseFloat(this.state.location.longitude) }}
-                                style={styles.mainMoodImg}>
-                                <Image
-                                    style={styles.moodImg}
-                                    source={this.mainMoodImg()}
-                                />
-                            </Marker>
-                        </MapView>
-                    </View>
-                </View>
-
-            );
+    mainMoodImg() {
+        if (this.state.mainMood == 1) {
+            return require('../resources/images/sad_icon.png')
+        } else if (this.state.mainMood == 2) {
+            return require('../resources/images/normal_icon.png')
+        } else if (this.state.mainMood == 3) {
+            return require('../resources/images/happy_icon.png')
         }
-
     }
-
-    getWeatherIcon() {
-        const imgUrl = 'https://openweathermap.org/img/wn/' + this.state.weather.icon + '@2x.png'
-        return { uri: imgUrl }
-    }
-
-    weather() {
-        if (this.state.weather) {
-            return (
-                <View>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 15, alignItems: 'center' }}>
-                        <Image style={{ width: 70, height: 70, backgroundColor: '#C0C0C0', borderRadius: 90, borderWidth: 1, borderColor: 'black' }}
-                            source={this.getWeatherIcon()}
-                        />
-                        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                            <Text style={{ fontSize: 20 }}>Temp: {this.state.weather.temperatur} C</Text>
-                            <Text style={{ fontSize: 20 }}>Desc: {this.state.weather.description}</Text>
-                            <Text style={{ fontSize: 20 }}>{this.state.weather.clouds} % Clouds</Text>
-                        </View>
-                    </View>
-                </View>
-
-            );
-        }
-
-    }
-
 
     allEmotions() {
         if (this.state.emotions.length > 0) {
             return (
-                <View style={{flexDirection:'row'}} >
+                <View style={{ flexDirection: 'row' }} >
                     <Text key="Header" style={[styles.topBarText, { marginStart: 15 }]}>Emotions:</Text>
                     {this.state.emotions.map(feeltEmotion =>
                         <Image
@@ -153,6 +79,72 @@ class AddReason extends Component {
             );
         }
     }
+
+    location() {
+        if (this.state.location && this.state.location.longitude && this.state.location.latitude) {
+            return (
+                <ExpandPanel title="Location">
+                    <View >
+                        <Text style={{ textAlign: 'center', fontSize: 20 }}>{this.state.location.city}, {this.state.location.country}</Text>
+                        <View style={{ height: 300, marginHorizontal: 15 }}>
+                            <MapView
+                                initialRegion={{
+                                    latitude: parseFloat(this.state.location.latitude),
+                                    longitude: parseFloat(this.state.location.longitude),
+                                    latitudeDelta: 0.0922,
+                                    longitudeDelta: 0.0421,
+                                }}
+                                style={{ ...StyleSheet.absoluteFillObject }}>
+                                <Marker
+                                    coordinate={{ latitude: parseFloat(this.state.location.latitude), longitude: parseFloat(this.state.location.longitude) }}
+                                    style={styles.mainMoodImg}>
+                                    <Image
+                                        style={styles.moodImg}
+                                        source={this.mainMoodImg()}
+                                    />
+                                </Marker>
+                            </MapView>
+                        </View>
+                    </View>
+                </ExpandPanel>
+            );
+        }
+
+    }
+
+    getCoordinate() {
+        return { lat: parseFloat(this.state.location.latitude), lng: parseFloat(this.state.location.longitude) }
+    }
+
+
+    weather() {
+        if (this.state.weather) {
+            return (
+                <ExpandPanel title="Weather">
+                    <View>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 15, alignItems: 'center' }}>
+                            <Image style={{ width: 70, height: 70, backgroundColor: '#C0C0C0', borderRadius: 90, borderWidth: 1, borderColor: 'black' }}
+                                source={this.getWeatherIcon()}
+                            />
+                            <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                <Text style={{ fontSize: 20 }}>Temp: {this.state.weather.temperatur} C</Text>
+                                <Text style={{ fontSize: 20 }}>Desc: {this.state.weather.description}</Text>
+                                <Text style={{ fontSize: 20 }}>{this.state.weather.clouds} % Clouds</Text>
+                            </View>
+                        </View>
+                    </View>
+                </ExpandPanel>
+            );
+        }
+
+    }
+
+    getWeatherIcon() {
+        const imgUrl = 'https://openweathermap.org/img/wn/' + this.state.weather.icon + '@2x.png'
+        return { uri: imgUrl }
+    }
+
+
 
     fetchWeather() {
         const API_KEY = "b884c72a7f69d65a331f083948fa44e6";

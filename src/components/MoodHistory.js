@@ -3,6 +3,10 @@ import { View, Text, Button, StyleSheet, FlatList, TouchableOpacity, Image } fro
 import Mood from '../models/Mood';
 import Weather from '../models/Weather';
 import Location from '../models/Location';
+import moment from "moment";
+import DateRangePicker from "react-native-daterange-picker";
+import ExpandPanel from '../widgets/ExpandPanel'
+import CustomeDate from '../widgets/CustomeDate';
 
 
 class MoodHistory extends Component {
@@ -12,6 +16,9 @@ class MoodHistory extends Component {
 
         this.state = {
             moods: this.realm.objects('Mood'),
+            startDate: null,
+            endDate: null,
+            displayedDate: moment()
         };
         this.realm.addListener('change', () => {
             this.setState({ moods: realm.objects('Mood') });
@@ -19,24 +26,56 @@ class MoodHistory extends Component {
 
     }
 
+    setDates = dates => {
+        console.log(dates);
+        this.setState({
+            ...dates
+        });
+    };
+
     componentWillUnmount() {
         this.realm.close();
     }
 
     render() {
+        const { startDate, endDate, displayedDate } = this.state;
         const { navigation } = this.props;
         return (
-            <View style={styles.menu}>
-                <Text
-                    style={styles.header}
-                >Old Moods</Text>
-                <FlatList
-                    style={{ height: 150 }}
-                    number={2}
-                    data={this.state.moods}
-                    renderItem={({ item }) => <ListItem mood={item} navigation={navigation} />}
-                    keyExtractor={item => item.id.toString()}
-                />
+            <View>
+                <View style={{ alignItems: 'center' }}>
+                    <DateRangePicker
+                        onChange={this.setDates}
+                        endDate={endDate}
+                        startDate={startDate}
+                        displayedDate={displayedDate}
+                        range
+                        maxDate={new Date()}
+                    >
+                        <View>
+                            <View flexDirection="row">
+                                <Text>End Date:  </Text>
+                                {startDate ? <CustomeDate date={startDate.toDate()} style={{ fontSize: 15 }}></CustomeDate> : null}
+                            </View>
+                            <View flexDirection="row">
+                                <Text>End Date:  </Text>
+                                {endDate ? <CustomeDate date={endDate.toDate()} style={{ fontSize: 15 }}></CustomeDate> : null}
+                            </View>
+                        </View>
+
+                    </DateRangePicker>
+                </View>
+                <View style={styles.menu}>
+                    <Text
+                        style={styles.header}
+                    >Old Moods</Text>
+                    <FlatList
+                        style={{ height: 150 }}
+                        number={2}
+                        data={this.state.moods}
+                        renderItem={({ item }) => <ListItem mood={item} navigation={navigation} />}
+                        keyExtractor={item => item.id.toString()}
+                    />
+                </View>
             </View>
         );
     }

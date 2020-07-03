@@ -41,6 +41,7 @@ class Main extends Component {
         }).then(realm => {
             this.setState({ realm });
         });
+
     }
 
     render() {

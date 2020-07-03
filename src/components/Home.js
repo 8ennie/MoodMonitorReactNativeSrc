@@ -59,6 +59,7 @@ class Home extends Component {
                         lable="Add Mood"
                         imageSource={require('../resources/images/add_mood.png')}
                         onPress={() => navigation.navigate('MoodAdd')}
+                        imageStyle={{borderRadius:0}}
                     />
                     <MenuButton
                         lable="History"

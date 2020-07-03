@@ -7,10 +7,13 @@ const CustomeDate = props => {
         <Text style={{ ...styles.text, ...props.style }}>{
             props.date.getDate() + "/" + 
             (props.date.getMonth() + 1) + "/" + 
-            props.date.getFullYear() + " (" + 
+            props.date.getFullYear() + 
+            
+            (props.time?
+            " (" + 
             (props.date.getHours() < 10 ? "0" + props.date.getHours() : props.date.getHours()) + ":" + 
             (props.date.getMinutes() < 10 ? "0" + props.date.getMinutes() : props.date.getMinutes()) + ")"
-            }</Text>
+            :"")}</Text>
     )
 };
 

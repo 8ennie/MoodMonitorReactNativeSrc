@@ -6,7 +6,6 @@ npm install @react-native-community/geolocation --save
 change in \android\app\src\main
 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-npm install --save react-native-vector-icons
 
 
 
@@ -18,3 +17,9 @@ buildscript {
 		androidMapsUtilsVersion = "2.0.1"
     }
 }
+
+npm i react-native-chart-kit --save
+npm i react-native-svg
+
+npm install --save react-native-daterange-picker
+npm install moment --save
