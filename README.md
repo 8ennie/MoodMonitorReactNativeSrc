@@ -1,5 +1,5 @@
 # MoodMonitor
-MoodMonitor is a project in ReactNative that allows a user to trackk his mood and certain params. The App the analyses it and gives a the user the opertunity to view coralations. 
+MoodMonitor is a project in ReactNative that allows a user to track his mood and certain params. The App then analyses the data and gives a the user the opertunity to view correlation. 
 
 ## Getting Started
 
