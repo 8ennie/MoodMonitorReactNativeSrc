@@ -29,6 +29,10 @@ A step by step guide to get the React Native Application to run!
   npm install react-native-reanimated react-native-gesture-handler react-native-screens react-native-safe-area-context @react-native-community/masked-view
   npm install --save realm
   npm install @react-native-community/geolocation --save
+  npm i react-native-chart-kit --save
+  npm i react-native-svg
+  npm install --save react-native-daterange-picker
+  npm install moment --save
   ```
 * For Andoid:
   * Add Lines to \android\app\src\main\AndroidManifest.xml:
