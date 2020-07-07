@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
-import { View, Text, Button, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native'
+import { View, Text, Button, StyleSheet, FlatList, TouchableOpacity, Image, Dimensions } from 'react-native'
 import Mood from '../models/Mood';
 import Weather from '../models/Weather';
 import Location from '../models/Location';
 import moment from "moment";
 import DateRangePicker from "react-native-daterange-picker";
-import ExpandPanel from '../widgets/ExpandPanel'
 import CustomeDate from '../widgets/CustomeDate';
+
 
 
 class MoodHistory extends Component {
@@ -15,15 +15,15 @@ class MoodHistory extends Component {
         super(props);
 
         this.state = {
-            moods: this.realm.objects('Mood'),
+            moods: this.realm.objects('Mood').sorted('date', true),
             startDate: null,
             endDate: null,
             displayedDate: moment()
         };
         this.realm.addListener('change', () => {
-            this.setState({ moods: realm.objects('Mood') });
+            this.setState({ moods: realm.objects('Mood').sorted('date', true) });
         });
-
+       
     }
 
     setDates = dates => {
@@ -31,11 +31,18 @@ class MoodHistory extends Component {
         this.setState({
             ...dates
         });
+
+        if (this.state.startDate && dates.endDate) {
+            const startDate = this.state.startDate.toDate();
+            this.setState({ moods: this.realm.objects('Mood').filtered('date > $0  AND date < $1', startDate, dates.endDate.toDate()).sorted('date', true) });
+        }
     };
 
     componentWillUnmount() {
         this.realm.close();
     }
+
+
 
     render() {
         const { startDate, endDate, displayedDate } = this.state;
@@ -51,19 +58,33 @@ class MoodHistory extends Component {
                         range
                         maxDate={new Date()}
                     >
-                        <View>
-                            <View flexDirection="row">
-                                <Text>End Date:  </Text>
-                                {startDate ? <CustomeDate date={startDate.toDate()} style={{ fontSize: 15 }}></CustomeDate> : null}
-                            </View>
-                            <View flexDirection="row">
-                                <Text>End Date:  </Text>
-                                {endDate ? <CustomeDate date={endDate.toDate()} style={{ fontSize: 15 }}></CustomeDate> : null}
-                            </View>
+                        <View style={{ padding: 5 }}>
+                            {(this.state.startDate ?
+                                <View flexDirection="row">
+                                    <Text style={styles.text}>Start Date:  </Text>
+                                    {startDate ? <CustomeDate date={startDate.toDate()} style={styles.text}></CustomeDate> : null}
+                                </View>
+                                : null)
+                            }
+                            {(this.state.endDate ?
+                                <View flexDirection="row">
+                                    <Text style={styles.text}>End Date:  </Text>
+                                    {endDate ? <CustomeDate date={endDate.toDate()} style={styles.text}></CustomeDate> : null}
+                                </View>
+                                : null)
+                            }
+                            {(!this.state.endDate || !this.state.startDate ?
+                                <View flexDirection="row">
+                                    <Text style={styles.changeDate}>Change Date</Text>
+                                </View>
+                                : null)
+                            }
                         </View>
 
                     </DateRangePicker>
                 </View>
+
+
                 <View style={styles.menu}>
                     <Text
                         style={styles.header}
@@ -96,8 +117,7 @@ function getMainMoodImage(mainMood) {
 function ListItem({ mood, navigation }) {
     return (
         <TouchableOpacity style={styles.listItem} onPress={() => navigation.navigate('ShowMood', { moodId: mood.id })} >
-            <Text style={styles.title}>{mood.date.getDate() + "/" + (mood.date.getMonth() + 1) + "/" + mood.date.getFullYear() +
-                " (" + mood.date.getHours() + ":" + mood.date.getMinutes() + ")"}</Text>
+            <CustomeDate date = {mood.date} style={styles.dateText} time/>
             <Image
                 style={styles.img}
                 source={getMainMoodImage(mood.mainMood)}
@@ -153,8 +173,23 @@ const styles = StyleSheet.create({
         borderColor: 'gray',
         borderWidth: 1,
         flexDirection: 'row',
-
-
+    },
+    changeDate: {
+        backgroundColor: "darkorange",
+        paddingVertical: 12,
+        paddingHorizontal: 25,
+        borderRadius: 25,
+        color: 'white',
+        fontSize: 18,
+        textAlign: 'center',
+    },
+    text: {
+        fontSize: 18,
+        textAlign: 'center',
+    },
+    dateText:{
+        fontWeight:'normal',
+        fontSize: 20
     }
 })
 

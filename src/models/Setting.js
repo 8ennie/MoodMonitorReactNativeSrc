@@ -1,9 +1,9 @@
-class Settings {
+class Setting {
     
 }
 
-Settings.schema = {
-    name: 'Settings',
+Setting.schema = {
+    name: 'Setting',
     primaryKey: 'property',
     properties: {
         property: 'string',
@@ -11,4 +11,4 @@ Settings.schema = {
     }
 };
 
-export default Settings
+export default Setting

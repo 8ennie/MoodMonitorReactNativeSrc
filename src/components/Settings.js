@@ -3,13 +3,25 @@ import { View, Text, StyleSheet } from 'react-native'
 import Mood from '../models/Mood';
 import Location from '../models/Location';
 import Weather from '../models/Weather';
+import Setting from '../models/Setting';
 import PreLoadedData from '../models/PreLoadData';
 import Emotions from '../models/Emotions';
+import CustomeButton from '../widgets/CustomeButton';
 
 
 
 const Realm = require('realm');
 class Settings extends Component {
+
+
+    constructor(props) {
+        super(props);
+        let realm = new Realm({ schema: [Setting] });
+        this.state = {
+            moodResponseEnabled: (realm.objectForPrimaryKey('Setting', 'moodResponseEnabled').value == 'true')
+        }
+        realm.close();
+    }
 
     render() {
         return (
@@ -36,8 +48,44 @@ class Settings extends Component {
                     >Add Random Moods</Text>
                 </View>
 
+                <View style={styles.menu}>
+                    <Text
+                        style={styles.header}
+
+                    >Mood Response</Text>
+
+                    <CustomeButton style={this.state.moodResponseEnabled ?
+                        { backgroundColor: 'orange', borderWidth: 2, borderColor: 'orange' } :
+                        { backgroundColor: 'white', borderWidth: 2, borderColor: 'orange' }}
+                        textStyle={this.state.moodResponseEnabled ?
+                            { color: 'white' } :
+                            { color: 'black' }}
+                        onPress={() => this.enableMoodResponse()}
+                    >{this.state.moodResponseEnabled ?
+                        "Disable Mood Response" :
+                        "Enable Mood Response"}
+                    </CustomeButton>
+                </View>
+
             </View>
         )
+    }
+
+    enableMoodResponse() {
+        const mRE = !this.state.moodResponseEnabled;
+       
+        let realm = new Realm({ schema: [Setting] });
+        realm.write(() => {
+            var prop = realm.objectForPrimaryKey('Setting', 'moodResponseEnabled');
+            if(prop){
+                prop.value = mRE.toString();
+            }else{
+                realm.create('Setting', {property: 'moodResponseEnabled', value: mRE.toString()})
+            }
+        });
+        
+        this.setState({ moodResponseEnabled: mRE });
+
     }
 
 
@@ -67,7 +115,7 @@ class Settings extends Component {
         let key = realm.objects('Mood').length + 1;
         realm.write(() => {
             for (i = 0; i < 10; i++) {
-                realm.create('Mood', { id: key + i, mainMood: this.getRandomInt(1,4), emotions: [Emotions[Math.random(Emotions.length)]], date: this.randomDate(new Date(2020, 5, 28), new Date()) });
+                realm.create('Mood', { id: key + i, mainMood: this.getRandomInt(1, 4), emotions: [Emotions[Math.random(Emotions.length)]], date: this.randomDate(new Date(2020, 5, 28), new Date()) });
             }
         });
         console.log("Randome Moods");

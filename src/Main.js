@@ -11,6 +11,7 @@ import AddReason from './components/AddReason';
 import Location from './models/Location';
 import Weather from './models/Weather';
 import MoodAnalysis from './components/MoodAnalysis';
+import MoodResponse from './components/MoodResponse';
 
 
 const Realm = require('realm');
@@ -20,7 +21,7 @@ const Stack = createStackNavigator();
 class Main extends Component {
 
 
-    Main(){
+    Main() {
         Stack = createStackNavigator();
     }
     constructor() {
@@ -94,6 +95,11 @@ class Main extends Component {
                         name="MoodAnalysis"
                         component={MoodAnalysis}
                         options={{ title: 'Moods Analysis' }}
+                    />
+                    <Stack.Screen
+                        name="MoodResponse"
+                        component={MoodResponse}
+                        options={{ title: 'Moods Response', headerShown: false }}
                     />
                 </Stack.Navigator>
             </NavigationContainer>

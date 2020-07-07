@@ -8,6 +8,7 @@ import CustomeDate from '../widgets/CustomeDate';
 import MenuButton from '../widgets/MenuButton';
 import Emotions from '../models/Emotions';
 import { add } from 'react-native-reanimated';
+import Setting from '../models/Setting';
 
 
 const Realm = require('realm');
@@ -56,11 +57,17 @@ class MoodAdd extends Component {
 
     onSaveMood() {
         let realm = new Realm({ schema: [Mood, Location, Weather] });
+        const moodId = realm.objects('Mood').length + 1;
         realm.write(() => {
             realm.create('Mood', { id: realm.objects('Mood').length + 1, mainMood: this.state.mainMood, emotions: this.state.emotions, note: this.state.note, date: this.state.date });
         });
         realm.close();
-        this.props.navigation.navigate('Home')
+        realm = new Realm({ schema: [Setting] });
+        if (realm.objectForPrimaryKey('Setting', 'moodResponseEnabled').value == 'true' && this.state.emotions.length > 0) {
+            this.props.navigation.navigate('MoodResponse', { emotions: this.state.emotions, moodId: moodId });
+        } else {
+            this.props.navigation.navigate('Home');
+        }
     }
 
     onAddReasons() {

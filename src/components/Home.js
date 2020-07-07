@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity } from 'react-native'
+import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity, Button } from 'react-native'
 import Mood from '../models/Mood';
 import Weather from '../models/Weather';
 import Location from '../models/Location';

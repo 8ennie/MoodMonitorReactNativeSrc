@@ -5,6 +5,7 @@ import Geolocation from '@react-native-community/geolocation';
 import Mood from '../models/Mood';
 import Location from '../models/Location';
 import Weather from '../models/Weather';
+import Setting from '../models/Setting';
 import CustomeButton from '../widgets/CustomeButton';
 import CustomeDate from '../widgets/CustomeDate';
 import MapView, { Marker } from 'react-native-maps';
@@ -161,9 +162,6 @@ class AddReason extends Component {
                 var weather = {};
                 weather.temperatur = weatherData.main.temp;
                 weather.clouds = weatherData.clouds.all;
-                if (weatherData.rain) {
-                    //TODO: get Rain
-                }
                 weather.description = weatherData.weather[0].description;
                 weather.icon = weatherData.weather[0].icon;
                 weather.sunrise = new Date(weatherData.sys.sunrise);
@@ -175,13 +173,19 @@ class AddReason extends Component {
 
     onSaveMood() {
         let realm = new Realm({ schema: [Mood, Location, Weather] });
+        const moodId = realm.objects('Mood').length + 1;
         realm.write(() => {
-            let mood = realm.create('Mood', { id: realm.objects('Mood').length + 1, mainMood: this.state.mainMood, emotions: this.state.emotions, note: this.state.note, date: this.state.date });
+            let mood = realm.create('Mood', { id: moodId, mainMood: this.state.mainMood, emotions: this.state.emotions, note: this.state.note, date: this.state.date });
             mood.location = realm.create('Location', { ...this.state.location, id: realm.objects('Location').length + 1 });
             mood.weather = realm.create('Weather', { ...this.state.weather, id: realm.objects('Weather').length + 1 });
         });
         realm.close();
-        this.props.navigation.navigate('Home');
+        realm = new Realm({ schema: [Setting] });
+        if (realm.objectForPrimaryKey('Setting', 'moodResponseEnabled').value == 'true' && this.state.emotions.length > 0) {
+            this.props.navigation.navigate('MoodResponse', { emotions: this.state.emotions, moodId: moodId });
+        } else {
+            this.props.navigation.navigate('Home');
+        }
     }
 
 }
