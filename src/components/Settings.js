@@ -17,10 +17,15 @@ class Settings extends Component {
     constructor(props) {
         super(props);
         let realm = new Realm({ schema: [Setting] });
+        let moodResponseEnabled = true;
+        if (realm.objectForPrimaryKey('Setting', 'moodResponseEnabled')){
+            moodResponseEnabled = realm.objectForPrimaryKey('Setting', 'moodResponseEnabled').value == 'true';
+        }
         this.state = {
-            moodResponseEnabled: (realm.objectForPrimaryKey('Setting', 'moodResponseEnabled').value == 'true')
+            moodResponseEnabled: moodResponseEnabled
         }
         realm.close();
+
     }
 
     render() {
