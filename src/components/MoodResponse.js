@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, Image, Dimensions, ImageBackground } from 'react-native'
+import { View, Text, StyleSheet, Image, ImageBackground } from 'react-native'
 import Emotions from '../models/Emotions';
 import Mood from '../models/Mood';
 import Location from '../models/Location';

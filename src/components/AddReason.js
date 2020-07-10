@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { NavigationActions, StackActions } from '@react-navigation/native';
-import { View, Text, StyleSheet, Image, Button, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, Image } from 'react-native'
 import Geolocation from '@react-native-community/geolocation';
 import Mood from '../models/Mood';
 import Location from '../models/Location';
@@ -11,6 +10,7 @@ import CustomeDate from '../widgets/CustomeDate';
 import MapView, { Marker } from 'react-native-maps';
 import ExpandPanel from '../widgets/ExpandPanel';
 import Emotions from '../models/Emotions';
+import { TextInput } from 'react-native-gesture-handler';
 const Realm = require('realm');
 
 class AddReason extends Component {
@@ -46,6 +46,7 @@ class AddReason extends Component {
 
                 {this.location()}
                 {this.weather()}
+                {this.notes()}
 
                 <View style={styles.bottomView}>
                     <CustomeButton onPress={() => this.onSaveMood()}>Save Your Mood</CustomeButton>
@@ -68,7 +69,7 @@ class AddReason extends Component {
         if (this.state.emotions.length > 0) {
             return (
                 <View style={{ flexDirection: 'row' }} >
-                    <Text key="Header" style={[styles.topBarText, { marginStart: 15 }]}>Emotions:</Text>
+                    <Text key="Header" style={[styles.topBarText, { marginStart: 15 }]}>{this.state.emotions.length > 1 ? "Emotions:" : "Emotion:"}</Text>
                     {this.state.emotions.map(feeltEmotion =>
                         <Image
                             key={feeltEmotion}
@@ -101,7 +102,7 @@ class AddReason extends Component {
                                     style={styles.mainMoodImg}>
                                     <Image
                                         style={styles.moodImg}
-                                        source={this.mainMoodImg()}
+                                        source={this.getMapIcon()}
                                     />
                                 </Marker>
                             </MapView>
@@ -111,6 +112,14 @@ class AddReason extends Component {
             );
         }
 
+    }
+
+    getMapIcon() {
+        if(this.state.emotions.length > 0){
+            return Emotions.find(emotion => this.state.emotions[0] == emotion.name).iconSource;
+        }else{
+            return this.mainMoodImg();
+        }
     }
 
     getCoordinate() {
@@ -170,6 +179,21 @@ class AddReason extends Component {
             });
     }
 
+
+    notes() {
+        return (
+            <ExpandPanel title="Notes">
+                <View>
+                    <TextInput
+                        style={{ borderColor: 'gray', borderWidth: 1, margin: 10, textAlignVertical: 'top' }}
+                        multiline
+                        numberOfLines={4}
+                        onChangeText={(text) => this.setState({ note: text })}
+                    />
+                </View>
+            </ExpandPanel>
+        );
+    }
 
     onSaveMood() {
         let realm = new Realm({ schema: [Mood, Location, Weather] });

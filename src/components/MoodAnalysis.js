@@ -7,7 +7,7 @@ import Weather from '../models/Weather';
 import MapView, { Marker } from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import Emotions from '../models/Emotions';
-import { LineChart } from 'react-native-chart-kit';
+import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
 
 
 
@@ -37,8 +37,8 @@ class MoodAnalysis extends Component {
         return (
             <View>
                 {this.states()}
-                {this.location()}
-                {this.mood()}
+                {/* {this.location()}
+                {this.mood()} */}
             </View>
         );
     }
@@ -105,7 +105,7 @@ class MoodAnalysis extends Component {
                     }}
                     bezier
                     style={{
-                        marginHorizontal:10,
+                        marginHorizontal: 10,
                         marginVertical: 8,
                         borderRadius: 16
                     }}
@@ -119,27 +119,119 @@ class MoodAnalysis extends Component {
         return (
             <ExpandPanel title="Statistics">
                 <View style={{ alignItems: 'center' }}>
-                    <ExpandPanel title="Mood">
+                    {this.moodStates()}
+                    {this.emotionalStates()}
+                </View>
+            </ExpandPanel>
+        )
+    }
+
+    moodStates() {
+        const moods = this.state.moods;
+        const data = [
+            {
+                name: "Good",
+                population: moods.filter(m => m.mainMood == 3).length,
+                color: "rgba(0, 179, 44, 1)",
+                legendFontColor: "#7F7F7F",
+                legendFontSize: 15
+            },
+            {
+                name: "Normal",
+                population: moods.filter(m => m.mainMood == 2).length,
+                color: "rgba(217, 217, 33, 1)",
+                legendFontColor: "#7F7F7F",
+                legendFontSize: 15
+            },
+            {
+                name: "Bad",
+                population: moods.filter(m => m.mainMood == 1).length,
+                color: "rgba(216, 31, 42, 1)",
+                legendFontColor: "#7F7F7F",
+                legendFontSize: 15
+            }
+        ]
+        return (
+            <View>
+                <ExpandPanel title="Mood">
+                    <View>
                         <View style={{ alignItems: 'center' }}>
                             <Text>Total Amount of Moods: {moods.length}</Text>
                             <Text>Good Moods: {moods.filter(m => m.mainMood == 3).length} ({Math.round(((moods.filter(m => m.mainMood == 3).length) * 100) / moods.length)}%)</Text>
                             <Text>Normal Moods: {moods.filter(m => m.mainMood == 2).length} ({Math.round(((moods.filter(m => m.mainMood == 2).length) * 100) / moods.length)}%)</Text>
                             <Text>Moods: {moods.filter(m => m.mainMood == 1).length} ({Math.round(((moods.filter(m => m.mainMood == 1).length) * 100) / moods.length)}%)</Text>
                         </View>
-                    </ExpandPanel>
-                    <ExpandPanel title="Emotions">
+
+                        <PieChart
+                            data={data}
+                            width={Dimensions.get("window").width - 20} // from react-native
+                            height={220}
+                            chartConfig={{
+                                backgroundColor: "#e26a00",
+                                backgroundGradientFrom: "#fb8c00",
+                                backgroundGradientTo: "#ffa726",
+                                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                                labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                            }}
+                            accessor="population"
+                            backgroundColor="transparent"
+                            paddingLeft="15"
+                            absolute
+                        />
+
+                    </View>
+
+                </ExpandPanel>
+            </View>
+        );
+    }
+
+    emotionalStates() {
+        const moods = this.state.moods;
+        var emotionStates = []
+        Emotions.forEach(em => {
+            emotionStates.push({ name: em.name, amount: moods.filter(m => m.emotions.map(e => e).includes(em.name)).length });
+        });
+        const data = {
+            labels: emotionStates.map(emS => emS.name),
+            datasets: [
+                {
+                    data: emotionStates.map(emS => emS.amount)
+                }
+            ]
+        };
+        return (
+            <View>
+                <ExpandPanel title="Emotions">
+                    <View>
+
                         <View style={{ alignItems: 'center' }}>
-                            {Emotions.map(em => {
-                                return (<Text key={em.name}>{em.name}: {moods.filter(m => {
-                                    var emo = m.emotions.map(e => e)
-                                    return emo.includes(em.name);
-                                }).length}</Text>)
+                            {emotionStates.map(emS => {
+                                return (
+                                    <Text key={emS.name}>
+                                        {emS.name}: {emS.amount}
+                                    </Text>
+                                )
                             })}
                         </View>
-                    </ExpandPanel>
-                </View>
-            </ExpandPanel>
-        )
+
+                        <BarChart
+                            style={{ padding: 5 }}
+                            data={data}
+                            width={Dimensions.get("window").width - 20} // from react-native
+                            height={220}
+                            chartConfig={{
+                                backgroundColor: "#e26a00",
+                                backgroundGradientFrom: "#fb8c00",
+                                backgroundGradientTo: "#ffa726",
+                                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                                labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                            }}
+                        />
+                    </View>
+                </ExpandPanel>
+            </View>
+        );
     }
 
     location() {

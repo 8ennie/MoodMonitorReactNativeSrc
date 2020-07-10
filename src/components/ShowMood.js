@@ -8,6 +8,8 @@ import ExpandPanel from '../widgets/ExpandPanel';
 import MapView, { Marker } from 'react-native-maps';
 import Emotions from '../models/Emotions';
 import MenuButton from '../widgets/MenuButton';
+import { TextInput, ScrollView } from 'react-native-gesture-handler';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 const Realm = require('realm');
@@ -48,10 +50,16 @@ class ShowMood extends Component {
                         source={this.mainMoodImg()}
                     />
                 </View>
-
                 {this.emotions()}
-                {this.location()}
-                {this.weather()}
+                <SafeAreaView style={styles.container}>
+                    <ScrollView style={styles.scrollView}>
+                        <View>
+                            {this.location()}
+                            {this.weather()}
+                            {this.note()}
+                        </View>
+                    </ScrollView>
+                </SafeAreaView>
             </View >
         );
     }
@@ -117,7 +125,7 @@ class ShowMood extends Component {
                                     coordinate={{ latitude: parseFloat(this.state.location.latitude), longitude: parseFloat(this.state.location.longitude) }}>
                                     <Image
                                         style={styles.moodImg}
-                                        source={this.mainMoodImg()}
+                                        source={this.getMapIcon()}
                                     />
                                 </Marker>
                             </MapView>
@@ -126,6 +134,14 @@ class ShowMood extends Component {
                 </ExpandPanel>
 
             );
+        }
+    }
+
+    getMapIcon() {
+        if (this.state.emotions.length > 0) {
+            return Emotions.find(emotion => this.state.emotions[0] == emotion.name).iconSource;
+        } else {
+            return this.mainMoodImg();
         }
     }
 
@@ -151,9 +167,23 @@ class ShowMood extends Component {
 
     }
 
-     getWeatherIcon() {
+    getWeatherIcon() {
         const imgUrl = 'https://openweathermap.org/img/wn/' + this.state.weather.icon + '@2x.png'
         return { uri: imgUrl }
+    }
+
+    note() {
+        if (this.state.note) {
+            console.log(this.state.note);
+
+            return (
+                <ExpandPanel title="Note">
+                    <View>
+                        <Text style={{ margin: 10, marginHorizontal: 15 }}>{this.state.note}</Text>
+                    </View>
+                </ExpandPanel>
+            );
+        }
     }
 
 }
