@@ -130,21 +130,21 @@ class MoodAnalysis extends Component {
         const moods = this.state.moods;
         const data = [
             {
-                name: "Good",
+                name: "(" + (Math.round(((moods.filter(m => m.mainMood == 3).length) * 100) / moods.length) +  "%)  Good"),
                 population: moods.filter(m => m.mainMood == 3).length,
                 color: "rgba(0, 179, 44, 1)",
                 legendFontColor: "#7F7F7F",
                 legendFontSize: 15
             },
             {
-                name: "Normal",
+                name: "(" + (Math.round(((moods.filter(m => m.mainMood == 2).length) * 100) / moods.length) +  "%)  Normal"),
                 population: moods.filter(m => m.mainMood == 2).length,
                 color: "rgba(217, 217, 33, 1)",
                 legendFontColor: "#7F7F7F",
                 legendFontSize: 15
             },
             {
-                name: "Bad",
+                name: "(" + (Math.round(((moods.filter(m => m.mainMood == 1).length) * 100) / moods.length) +  "%)  Bad"),
                 population: moods.filter(m => m.mainMood == 1).length,
                 color: "rgba(216, 31, 42, 1)",
                 legendFontColor: "#7F7F7F",
@@ -157,9 +157,6 @@ class MoodAnalysis extends Component {
                     <View>
                         <View style={{ alignItems: 'center' }}>
                             <Text>Total Amount of Moods: {moods.length}</Text>
-                            <Text>Good Moods: {moods.filter(m => m.mainMood == 3).length} ({Math.round(((moods.filter(m => m.mainMood == 3).length) * 100) / moods.length)}%)</Text>
-                            <Text>Normal Moods: {moods.filter(m => m.mainMood == 2).length} ({Math.round(((moods.filter(m => m.mainMood == 2).length) * 100) / moods.length)}%)</Text>
-                            <Text>Moods: {moods.filter(m => m.mainMood == 1).length} ({Math.round(((moods.filter(m => m.mainMood == 1).length) * 100) / moods.length)}%)</Text>
                         </View>
 
                         <PieChart
@@ -205,7 +202,7 @@ class MoodAnalysis extends Component {
                 <ExpandPanel title="Emotions">
                     <View>
 
-                        <View style={{ alignItems: 'center' }}>
+                        {/* <View style={{ alignItems: 'center' }}>
                             {emotionStates.map(emS => {
                                 return (
                                     <Text key={emS.name}>
@@ -213,7 +210,7 @@ class MoodAnalysis extends Component {
                                     </Text>
                                 )
                             })}
-                        </View>
+                        </View> */}
 
                         <BarChart
                             style={{ padding: 5 }}

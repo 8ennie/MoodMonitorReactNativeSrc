@@ -8,7 +8,7 @@ import CustomeDate from '../widgets/CustomeDate';
 import MenuButton from '../widgets/MenuButton';
 import Emotions from '../models/Emotions';
 import { add } from 'react-native-reanimated';
-import Setting from '../models/Setting';
+import { Setting } from '../models/Setting';
 
 
 const Realm = require('realm');
@@ -43,12 +43,12 @@ class MoodAdd extends Component {
     }
 
 
-    onPressEmotion(emotion) {        
+    onPressEmotion(emotion) {
         var newEmotions = this.state.emotions;
         if (newEmotions.includes(emotion)) {
             newEmotions.splice(newEmotions.indexOf(emotion), 1);
         } else {
-            if(newEmotions.length > 0){
+            if (newEmotions.length > 0) {
                 newEmotions = [];
             }
             newEmotions.push(emotion);
@@ -113,12 +113,12 @@ class MoodAdd extends Component {
                                 lable={item.name}
                                 imageSource={item.iconSource}
                                 onPress={() => this.onPressEmotion(item.name)}
-                                style={{ width: 90, height: 90}}
+                                style={{ width: 90, height: 90 }}
                                 imageStyle={styles.imgEmotion}
                                 textStyle={this.state.emotions.includes(item.name) ? { fontSize: 20, color: 'orange', fontWeight: 'normal' } : { fontSize: 20, color: 'black', fontWeight: 'normal' }}
                             />
-                        } 
-                        keyExtractor={item => item.name} 
+                        }
+                        keyExtractor={item => item.name}
                         horizontal={false}
                         numColumns={3}
                     />
@@ -131,7 +131,7 @@ class MoodAdd extends Component {
             </View >
         );
     }
-   
+
 }
 
 

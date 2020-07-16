@@ -4,12 +4,14 @@ import Mood from '../models/Mood';
 import Weather from '../models/Weather';
 import Location from '../models/Location';
 import MenuButton from '../widgets/MenuButton';
+import { Setting, preloadSettings } from '../models/Setting';
+
 
 const Realm = require('realm');
 
 class Home extends Component {
 
-    realm = new Realm({ schema: [Mood, Location, Weather] });
+    realm = new Realm({ schema: [Mood, Location, Weather, Setting] });
     constructor(props) {
         super(props);
         this.state = {
@@ -18,7 +20,13 @@ class Home extends Component {
         this.realm.addListener('change', () => {
             this.setState({ moods: this.avgMoods() });
         });
+        if (!this.realm.objectForPrimaryKey('Setting', 'moodResponseEnabled')) {
+            preloadSettings();
+            console.log("Prelaoded Settings");
+        } else {
+            console.log("Settings Exist");
 
+        }
     }
 
     componentWillUnmount() {
@@ -54,12 +62,12 @@ class Home extends Component {
         const { navigation } = this.props;
         return (
             <View >
-                <View style= {{flexDirection:'row', justifyContent:'space-around', marginVertical:20}}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginVertical: 20 }}>
                     <MenuButton
                         lable="Add Mood"
                         imageSource={require('../resources/images/add_mood.png')}
                         onPress={() => navigation.navigate('MoodAdd')}
-                        imageStyle={{borderRadius:0}}
+                        imageStyle={{ borderRadius: 0 }}
                     />
                     <MenuButton
                         lable="History"
@@ -67,8 +75,8 @@ class Home extends Component {
                         onPress={() => navigation.navigate('MoodHistory')}
                     />
                 </View>
-                <View style= {{flexDirection:'row', justifyContent:'space-around'}}>
-                <MenuButton
+                <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+                    <MenuButton
                         lable="Analysis"
                         imageSource={require('../resources/images/analysis_icon.png')}
                         onPress={() => navigation.navigate('MoodAnalysis')}

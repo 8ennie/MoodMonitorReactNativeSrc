@@ -4,7 +4,7 @@ import Geolocation from '@react-native-community/geolocation';
 import Mood from '../models/Mood';
 import Location from '../models/Location';
 import Weather from '../models/Weather';
-import Setting from '../models/Setting';
+import { Setting } from '../models/Setting';
 import CustomeButton from '../widgets/CustomeButton';
 import CustomeDate from '../widgets/CustomeDate';
 import MapView, { Marker } from 'react-native-maps';
@@ -115,9 +115,9 @@ class AddReason extends Component {
     }
 
     getMapIcon() {
-        if(this.state.emotions.length > 0){
+        if (this.state.emotions.length > 0) {
             return Emotions.find(emotion => this.state.emotions[0] == emotion.name).iconSource;
-        }else{
+        } else {
             return this.mainMoodImg();
         }
     }

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native'
 import Mood from '../models/Mood';
 import Location from '../models/Location';
 import Weather from '../models/Weather';
-import Setting from '../models/Setting';
+import { Setting } from '../models/Setting';
 import PreLoadedData from '../models/PreLoadData';
 import Emotions from '../models/Emotions';
 import CustomeButton from '../widgets/CustomeButton';
@@ -18,7 +18,7 @@ class Settings extends Component {
         super(props);
         let realm = new Realm({ schema: [Setting] });
         let moodResponseEnabled = true;
-        if (realm.objectForPrimaryKey('Setting', 'moodResponseEnabled')){
+        if (realm.objectForPrimaryKey('Setting', 'moodResponseEnabled')) {
             moodResponseEnabled = realm.objectForPrimaryKey('Setting', 'moodResponseEnabled').value == 'true';
         }
         this.state = {
@@ -78,17 +78,17 @@ class Settings extends Component {
 
     enableMoodResponse() {
         const mRE = !this.state.moodResponseEnabled;
-       
+
         let realm = new Realm({ schema: [Setting] });
         realm.write(() => {
             var prop = realm.objectForPrimaryKey('Setting', 'moodResponseEnabled');
-            if(prop){
+            if (prop) {
                 prop.value = mRE.toString();
-            }else{
-                realm.create('Setting', {property: 'moodResponseEnabled', value: mRE.toString()})
+            } else {
+                realm.create('Setting', { property: 'moodResponseEnabled', value: mRE.toString() })
             }
         });
-        
+
         this.setState({ moodResponseEnabled: mRE });
 
     }
