@@ -35,6 +35,8 @@ class Home extends Component {
     componentWillUnmount() {
         this.realm.close();
     }
+
+    
     avgMoods() {
         let allMoods = this.realm.objects('Mood').sorted('date');
         let avgMoods = [];
@@ -128,7 +130,7 @@ function ListItem({ mood }) {
     return (
         <TouchableOpacity style={styles.listItem}>
             <Text style={styles.title}>{mood.date.getDate() + "/" + (mood.date.getMonth() + 1) + "/" + mood.date.getFullYear()}</Text>
-            <Text>{mood.avgMood}</Text>
+            {/* <Text>{mood.avgMood}</Text> */}
             <Image
                 style={styles.img}
                 source={getMainMoodImage(mood.avgMood)}

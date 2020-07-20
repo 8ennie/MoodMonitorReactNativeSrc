@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, Image, Dimensions } from 'react-native'
+import { View, Text, StyleSheet, Image, Dimensions, ScrollView } from 'react-native'
 import Mood from '../models/Mood';
 import ExpandPanel from '../widgets/ExpandPanel';
-import Location from '../models/Location';
-import Weather from '../models/Weather';
 import MapView, { Marker } from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import Emotions from '../models/Emotions';
 import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
+import ModalSelector from 'react-native-modal-selector';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 
@@ -18,9 +18,10 @@ class MoodAnalysis extends Component {
     realm = Mood.getRealm();
     constructor(props) {
         super(props);
-        
+
         this.state = {
             moods: this.realm.objects('Mood'),
+            reasonMoods: []
         };
         this.realm.addListener('change', () => {
             this.setState({ moods: this.realm.objects('Mood') });
@@ -36,15 +37,19 @@ class MoodAnalysis extends Component {
     render() {
         return (
             <View>
-                {this.states()}
-                {/* {this.location()}
-                {this.mood()} */}
+                <SafeAreaView>
+                    <ScrollView>
+                        {this.states()}
+                        {this.location()}
+                        {this.reasons()}
+                    </ScrollView>
+                </SafeAreaView>
+
             </View>
         );
     }
 
-    avgMoods() {
-        let allMoods = this.realm.objects('Mood').sorted('date');
+    avgMoods(allMoods) {
         let avgMoods = [];
         let oldDate = new Date().getTime();
         let count = 0;
@@ -71,7 +76,7 @@ class MoodAnalysis extends Component {
 
     mood() {
 
-        var moods = this.avgMoods();
+        var moods = this.avgMoods(this.realm.objects('Mood').sorted('date'));
 
         return (
             <View>
@@ -130,21 +135,21 @@ class MoodAnalysis extends Component {
         const moods = this.state.moods;
         const data = [
             {
-                name: "(" + (Math.round(((moods.filter(m => m.mainMood == 3).length) * 100) / moods.length) +  "%)  Good"),
+                name: "(" + (Math.round(((moods.filter(m => m.mainMood == 3).length) * 100) / moods.length) + "%)  Good"),
                 population: moods.filter(m => m.mainMood == 3).length,
                 color: "rgba(0, 179, 44, 1)",
                 legendFontColor: "#7F7F7F",
                 legendFontSize: 15
             },
             {
-                name: "(" + (Math.round(((moods.filter(m => m.mainMood == 2).length) * 100) / moods.length) +  "%)  Normal"),
+                name: "(" + (Math.round(((moods.filter(m => m.mainMood == 2).length) * 100) / moods.length) + "%)  Normal"),
                 population: moods.filter(m => m.mainMood == 2).length,
                 color: "rgba(217, 217, 33, 1)",
                 legendFontColor: "#7F7F7F",
                 legendFontSize: 15
             },
             {
-                name: "(" + (Math.round(((moods.filter(m => m.mainMood == 1).length) * 100) / moods.length) +  "%)  Bad"),
+                name: "(" + (Math.round(((moods.filter(m => m.mainMood == 1).length) * 100) / moods.length) + "%)  Bad"),
                 population: moods.filter(m => m.mainMood == 1).length,
                 color: "rgba(216, 31, 42, 1)",
                 legendFontColor: "#7F7F7F",
@@ -236,7 +241,6 @@ class MoodAnalysis extends Component {
         if (this.state.currentLocation && this.state.moods.length > 0) {
             return (
                 <ExpandPanel title="Locations">
-
                     <View style={{ height: 300, marginHorizontal: 15 }}>
                         <MapView
                             initialRegion={{
@@ -263,15 +267,124 @@ class MoodAnalysis extends Component {
                             }
                             )}
                         </MapView>
-
                     </View>
-
-
                 </ExpandPanel>
             )
         }
     }
 
+    reasons() {
+        let data = Mood.getRealm().objects('Reason').map(r => {
+            return { key: r.name, label: r.name }
+        });
+        const moods = this.state.reasonMoods;
+        const avgMoods = this.avgMoods(moods);
+        let emotionData = [];
+        if (moods.length > 0) {
+            var emotionStates = []
+            Emotions.forEach(em => {
+                emotionStates.push({ name: em.name, amount: moods.filter(m => m.emotions.map(e => e).includes(em.name)).length });
+            });
+            emotionData = emotionStates.map(emotion => {
+                return ({
+                    name: emotion.name,
+                    population: emotion.amount,
+                    color: '#' + parseInt(Math.random() * 0xffffff).toString(16),
+                    legendFontColor: "#7F7F7F",
+                    legendFontSize: 15
+                });
+            });
+        }
+
+        return (
+            <ExpandPanel title="Reasons">
+                <View>
+                    <ModalSelector
+                        data={data}
+                        initValue={"Select a Reason!"}
+                        onChange={(item) => { }}
+                        onModalClose={(item) => this.reasonChange(item)}
+                    >
+                        <Text style={{ textAlign: 'center', fontSize: 20, borderWidth: 1, borderRadius: 15, marginHorizontal: 15, paddingVertical: 5 }}>{this.state.reason ? this.state.reason : "Choose a Reason"}</Text>
+                    </ModalSelector>
+                    {
+                        (avgMoods.length > 0) ?
+                            (
+                                <View>
+                                    <Text style={{ textAlign: 'center', fontSize: 20 }}>Mood Avg</Text>
+                                    <LineChart
+                                        data={{
+                                            labels: avgMoods.map(m => (m.date.getDate() + "/" + (m.date.getMonth() + 1) + "/" + m.date.getFullYear())),
+                                            datasets: [
+                                                {
+                                                    data: avgMoods.map(m => m.avgMood)
+                                                }
+                                            ]
+                                        }}
+                                        width={Dimensions.get("window").width - 20} // from react-native
+                                        height={220}
+                                        chartConfig={{
+                                            backgroundColor: "#e26a00",
+                                            backgroundGradientFrom: "#fb8c00",
+                                            backgroundGradientTo: "#ffa726",
+                                            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                                            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                                            style: {
+                                                borderRadius: 16
+                                            },
+                                            propsForDots: {
+                                                r: "6",
+                                                strokeWidth: "2",
+                                                stroke: "#ffa726"
+                                            }
+                                        }}
+                                        bezier
+                                        style={{
+                                            marginHorizontal: 10,
+                                            marginVertical: 8,
+                                            borderRadius: 16
+                                        }}
+                                    />
+                                </View>
+
+                            )
+                            : null
+                    }
+                    {
+                        (moods.length > 0) ?
+                            (
+                                <View>
+                                    <Text style={{ textAlign: 'center', fontSize: 20 }}>Emotions</Text>
+                                    <PieChart
+                                        data={emotionData}
+                                        width={Dimensions.get("window").width - 20} // from react-native
+                                        height={220}
+                                        chartConfig={{
+                                            backgroundColor: "#e26a00",
+                                            backgroundGradientFrom: "#fb8c00",
+                                            backgroundGradientTo: "#ffa726",
+                                            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                                            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                                        }}
+                                        accessor="population"
+                                        backgroundColor="transparent"
+                                        paddingLeft="15"
+                                        absolute
+                                    />
+                                </View>
+                            )
+                            : null
+                    }
+
+
+
+                </View>
+            </ExpandPanel>
+        );
+    }
+    reasonChange(reason) {
+        this.setState({ reasonMoods: this.realm.objectForPrimaryKey('Reason', reason.key).moods.sorted('date'), reason: reason.key })
+    }
     mainMoodImg(mood) {
         if (mood == 1) {
             return require('../resources/images/sad_icon.png');
