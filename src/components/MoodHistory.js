@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import { View, Text, Button, StyleSheet, FlatList, TouchableOpacity, Image, Dimensions } from 'react-native'
 import Mood from '../models/Mood';
-import Weather from '../models/Weather';
-import Location from '../models/Location';
 import moment from "moment";
 import DateRangePicker from "react-native-daterange-picker";
 import CustomeDate from '../widgets/CustomeDate';
@@ -10,7 +8,7 @@ import CustomeDate from '../widgets/CustomeDate';
 
 
 class MoodHistory extends Component {
-    realm = new Realm({ schema: [Mood, Location, Weather] });
+    realm = Mood.getRealm();
     constructor(props) {
         super(props);
 

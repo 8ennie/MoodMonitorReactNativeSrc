@@ -13,7 +13,7 @@ class MoodResponse extends Component {
 
 
     constructor(props) {
-        var realm = new Realm({ schema: [Mood, Location, Weather] });
+        var realm = Mood.getRealm();
         super(props);
         const emotions = props.route.params.emotions;
         const emotion = Emotions.find(e => e.name == emotions[this.getRandomInt(emotions.length)]);

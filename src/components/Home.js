@@ -5,13 +5,14 @@ import Weather from '../models/Weather';
 import Location from '../models/Location';
 import MenuButton from '../widgets/MenuButton';
 import { Setting, preloadSettings } from '../models/Setting';
+import { Reason } from '../models/Reason';
 
 
 const Realm = require('realm');
 
 class Home extends Component {
 
-    realm = new Realm({ schema: [Mood, Location, Weather, Setting] });
+    realm = Mood.getRealm();
     constructor(props) {
         super(props);
         this.state = {
@@ -20,8 +21,10 @@ class Home extends Component {
         this.realm.addListener('change', () => {
             this.setState({ moods: this.avgMoods() });
         });
-        if (!this.realm.objectForPrimaryKey('Setting', 'moodResponseEnabled')) {
+        let settingsRealm = new Realm({ schema: [Setting] });
+        if (!settingsRealm.objectForPrimaryKey('Setting', 'moodResponseEnabled')) {
             preloadSettings();
+            Reason.loadInitalReasons();
             console.log("Prelaoded Settings");
         } else {
             console.log("Settings Exist");

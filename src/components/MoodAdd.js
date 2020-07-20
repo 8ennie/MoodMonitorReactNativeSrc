@@ -59,7 +59,7 @@ class MoodAdd extends Component {
     }
 
     onSaveMood() {
-        let realm = new Realm({ schema: [Mood, Location, Weather] });
+        let realm = Mood.getRealm();
         const moodId = realm.objects('Mood').length + 1;
         realm.write(() => {
             realm.create('Mood', { id: realm.objects('Mood').length + 1, mainMood: this.state.mainMood, emotions: this.state.emotions, note: this.state.note, date: this.state.date });

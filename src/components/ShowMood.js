@@ -1,18 +1,13 @@
 import React, { Component } from 'react';
-import { View, Text, Button, StyleSheet, Image, TouchableOpacity, FlatList } from 'react-native'
+import { View, Text, StyleSheet, Image, FlatList, ScrollView } from 'react-native'
 import Mood from '../models/Mood';
-import Location from '../models/Location';
-import Weather from '../models/Weather';
 import CustomeDate from '../widgets/CustomeDate';
 import ExpandPanel from '../widgets/ExpandPanel';
 import MapView, { Marker } from 'react-native-maps';
 import Emotions from '../models/Emotions';
 import MenuButton from '../widgets/MenuButton';
-import { TextInput, ScrollView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-
-const Realm = require('realm');
 
 class ShowMood extends Component {
 
@@ -27,7 +22,7 @@ class ShowMood extends Component {
 
     constructor(props) {
         super(props);
-        let realm = new Realm({ schema: [Mood, Location, Weather] });
+        let realm = Mood.getRealm();
         let mood = realm.objectForPrimaryKey('Mood', props.route.params.moodId);
         this.state = {
             date: mood.date,
@@ -35,7 +30,8 @@ class ShowMood extends Component {
             emotions: mood.emotions.map(e => e),
             note: mood.note,
             location: mood.location,
-            weather: mood.weather
+            weather: mood.weather,
+            reasons: mood.reasons,
         };
     }
 
@@ -44,18 +40,26 @@ class ShowMood extends Component {
             <View style={{ flex: 1 }}>
                 <CustomeDate date={this.state.date} time></CustomeDate>
                 <Text style={styles.heading}>How did You Feel:</Text>
-                <View style={styles.imgMainMoodGroup}>
-                    < Image
-                        style={styles.imgMainMood}
-                        source={this.mainMoodImg()}
-                    />
+                <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+                    <View style={{ borderColor: 'black', borderWidth: 1, borderRadius: 10 }}>
+                        <Text style={{ textAlign: 'center', fontSize: 20 }}>Overal:</Text>
+                        <View style={styles.imgMainMoodGroup}>
+                            < Image
+                                style={styles.imgMainMood}
+                                source={this.mainMoodImg()}
+                            />
+                        </View>
+                    </View>
+                    {this.emotions()}
                 </View>
-                {this.emotions()}
-                <SafeAreaView style={styles.container}>
-                    <ScrollView style={styles.scrollView}>
+
+
+                <SafeAreaView style={{ height: '60%' }}>
+                    <ScrollView>
                         <View>
                             {this.location()}
                             {this.weather()}
+                            {this.reasons()}
                             {this.note()}
                         </View>
                     </ScrollView>
@@ -80,7 +84,8 @@ class ShowMood extends Component {
                 data.push(Emotions.find(em => em.name == e));
             });
             return (
-                <ExpandPanel title="Emotions">
+                <View style={{ borderColor: 'black', borderWidth: 1, borderRadius: 10 }}>
+                    <Text style={{ textAlign: 'center', fontSize: 20 }}>Emotional:</Text>
                     <View style={{ alignItems: 'center' }}>
                         <FlatList
                             data={data}
@@ -89,7 +94,7 @@ class ShowMood extends Component {
                                 <MenuButton
                                     lable={item.name}
                                     imageSource={item.iconSource}
-                                    style={{ width: 90, height: 90 }}
+                                    style={{ width: 100, height: 100 }}
                                     imageStyle={{ borderRadius: 90 }}
                                     textStyle={{ fontSize: 18, color: 'black', fontWeight: 'normal' }}
                                 />
@@ -99,7 +104,9 @@ class ShowMood extends Component {
                             numColumns={3}
                         />
                     </View>
-                </ExpandPanel>
+                </View>
+
+
             );
         }
     }
@@ -170,6 +177,24 @@ class ShowMood extends Component {
     getWeatherIcon() {
         const imgUrl = 'https://openweathermap.org/img/wn/' + this.state.weather.icon + '@2x.png'
         return { uri: imgUrl }
+    }
+
+    reasons() {
+        const {reasons} = this.state;
+        if (reasons.length > 0) {
+            return (
+                <ExpandPanel title="Reasons">
+                    <View style= {{alignItems: 'center'}}>
+                        {reasons.map(r => {
+                            return (
+                                <Text style={{ fontSize: 20 }} key={r.name}>
+                                     {r.name}
+                                </Text>);
+                        })}
+                    </View>
+                </ExpandPanel>
+            );
+        }
     }
 
     note() {

@@ -15,15 +15,15 @@ const Realm = require('realm');
 
 class MoodAnalysis extends Component {
 
-    realm = new Realm({ schema: [Mood, Location, Weather] });
+    realm = Mood.getRealm();
     constructor(props) {
         super(props);
-        let realm = new Realm({ schema: [Mood, Location, Weather] });
+        
         this.state = {
-            moods: realm.objects('Mood'),
+            moods: this.realm.objects('Mood'),
         };
-        realm.addListener('change', () => {
-            this.setState({ moods: realm.objects('Mood') });
+        this.realm.addListener('change', () => {
+            this.setState({ moods: this.realm.objects('Mood') });
         });
         Geolocation.getCurrentPosition(info => {
             this.setState({ currentLocation: { latitude: info.coords.latitude, longitude: info.coords.longitude } });

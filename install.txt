@@ -24,4 +24,6 @@ npm i react-native-svg
 npm install --save react-native-daterange-picker
 npm install moment --save
 
+npm install --save react-native-dialog-input
+npm i react-native-modal-selector --save
  android:windowSoftInputMode="adjustPan"

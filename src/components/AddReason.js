@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native'
+import { View, Text, StyleSheet, Image, ScrollView, Button, TouchableOpacity } from 'react-native'
 import Geolocation from '@react-native-community/geolocation';
 import Mood from '../models/Mood';
-import Location from '../models/Location';
-import Weather from '../models/Weather';
 import { Setting } from '../models/Setting';
 import CustomeButton from '../widgets/CustomeButton';
 import CustomeDate from '../widgets/CustomeDate';
@@ -11,6 +9,11 @@ import MapView, { Marker } from 'react-native-maps';
 import ExpandPanel from '../widgets/ExpandPanel';
 import Emotions from '../models/Emotions';
 import { TextInput } from 'react-native-gesture-handler';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import ModalSelector from 'react-native-modal-selector'
+import DialogInput from 'react-native-dialog-input';
+import { Reason } from '../models/Reason';
+
 const Realm = require('realm');
 
 class AddReason extends Component {
@@ -21,6 +24,9 @@ class AddReason extends Component {
             date: new Date(props.route.params.mood.date),
             mainMood: props.route.params.mood.mainMood,
             emotions: props.route.params.mood.emotions,
+            reasonsDialogVisible: false,
+            addReasonDialogVisible: false,
+            reasons: [],
         };
         Geolocation.getCurrentPosition(info => {
             var location = {};
@@ -43,10 +49,14 @@ class AddReason extends Component {
                     />
                     {this.allEmotions()}
                 </View>
-
-                {this.location()}
-                {this.weather()}
-                {this.notes()}
+                <SafeAreaView style={{ height: '70%' }}>
+                    <ScrollView nestedScrollEnabled>
+                        {this.location()}
+                        {this.weather()}
+                        {this.reason()}
+                        {this.notes()}
+                    </ScrollView>
+                </SafeAreaView>
 
                 <View style={styles.bottomView}>
                     <CustomeButton onPress={() => this.onSaveMood()}>Save Your Mood</CustomeButton>
@@ -179,7 +189,102 @@ class AddReason extends Component {
             });
     }
 
+    reason() {
+        let data = Mood.getRealm().objects('Reason').map(r => {
+            return { key: r.name, label: r.name, component: this.getReasonComponent(r) }
+        });
+        data.push({ key: 'Add', label: 'Add', component: this.addReason() });
+        const { reasons } = this.state;
+        return (
+            <View>
+                <ExpandPanel title="Reasons">
+                    <View>
+                        <View style={{ alignItems: 'center' }}>
+                            {reasons.map(r => {
+                                return (
+                                    <Text style={{ fontSize: 20 }} key={r}>
+                                        {r}
+                                    </Text>);
+                            })}
+                        </View>
+                        <ModalSelector
+                            data={data}
+                            initValue={this.state.reasons.length > 0 ? "Add a Resoan" : "Select a Reason!"}
+                            onChange={(option) => this.reasonChange(option)}
+                            closeOnChange={false}
+                            cancelText="Close"
+                        />
+                    </View>
 
+                </ExpandPanel>
+
+
+            </View>
+
+        );
+    }
+
+    addReason() {
+        return (
+            <View>
+                <TouchableOpacity onPress={() => this.setState({ addReasonDialogVisible: true })} >
+                    <Text style= {{color:'green', textAlign: 'center'}}>Add other</Text>
+                </TouchableOpacity>
+                <DialogInput isDialogVisible={this.state.addReasonDialogVisible}
+                    title={"Add new Reason"}
+                    message={"Pleas enter the Reason for your Mood"}
+                    hintInput={"Reason"}
+                    submitInput={(inputText) => { this.saveNewReason(inputText) }}
+                    closeDialog={() => this.setState({ addReasonDialogVisible: false })}>
+                </DialogInput>
+            </View>
+
+        );
+    }
+
+    saveNewReason(reason) {
+        Reason.save(reason);
+        this.reasonChange({key: reason, label: reason});
+        this.setState({ addReasonDialogVisible: false })
+    }
+
+    reasonChange(option) {
+        if (option.key != 'Add') {
+            let { reasons } = this.state;
+            if (reasons.includes(option.key)) {
+                reasons.splice(reasons.indexOf(option.key), 1);
+            } else {
+                reasons.push(option.key);
+            }
+            this.setState({ reasons: reasons })
+        }
+    }
+
+    getReasonComponent(reason) {
+        return (
+            <View>
+                <Text style={(this.state.reasons.includes(reason.name) ? { color: 'blue', textAlign: 'center'}  :  {color: 'black', textAlign: 'center'})}>
+                    {reason.name}
+                </Text>
+            </View>
+        );
+    }
+
+    getReasonDialog() {
+
+        return (
+            <View>
+                <Text>This is the Options</Text>
+                {
+                    this.state.reasons.forEach(r => {
+                        return (
+                            <Text> Test {r.name}</Text>
+                        );
+                    })
+                }
+            </View>
+        );
+    }
     notes() {
         return (
             <ExpandPanel title="Notes">
@@ -196,12 +301,17 @@ class AddReason extends Component {
     }
 
     onSaveMood() {
-        let realm = new Realm({ schema: [Mood, Location, Weather] });
+        let realm = Mood.getRealm();
         const moodId = realm.objects('Mood').length + 1;
         realm.write(() => {
             let mood = realm.create('Mood', { id: moodId, mainMood: this.state.mainMood, emotions: this.state.emotions, note: this.state.note, date: this.state.date });
             mood.location = realm.create('Location', { ...this.state.location, id: realm.objects('Location').length + 1 });
             mood.weather = realm.create('Weather', { ...this.state.weather, id: realm.objects('Weather').length + 1 });
+            let realmReasons = [];
+            this.state.reasons.forEach(r => {
+                realmReasons.push(realm.objectForPrimaryKey('Reason', r));
+            });
+            mood.reasons = realmReasons;
         });
         realm.close();
         realm = new Realm({ schema: [Setting] });

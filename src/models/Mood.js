@@ -1,5 +1,13 @@
+import Location from './Location';
+import Weather from './Weather';
+import { Reason } from './Reason';
+
+const Realm = require('realm');
+
 class Mood {
-    
+    static getRealm(){
+        return new Realm({ schema: [Mood, Location, Weather, Reason] });
+    }
 }
 
 Mood.schema = {
@@ -13,6 +21,7 @@ Mood.schema = {
         note: 'string?',
         location: 'Location?',
         weather: 'Weather?',
+        reasons: {type: 'Reason[]'}
     }
 };
 
