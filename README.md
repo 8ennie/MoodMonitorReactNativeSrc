@@ -25,14 +25,17 @@ A step by step guide to get the React Native Application to run!
 
 * Install missing dependancys
   ```
-  npm install @react-navigation/native @react-navigation/stack
-  npm install react-native-reanimated react-native-gesture-handler react-native-screens react-native-safe-area-context @react-native-community/masked-view
+  npm install --save @react-navigation/native @react-navigation/stack
+  npm install --save react-native-reanimated react-native-gesture-handler react-native-screens react-native-safe-area-context @react-native-community/masked-view
   npm install --save realm
-  npm install @react-native-community/geolocation --save
-  npm i react-native-chart-kit --save
-  npm i react-native-svg
+  npm install --save @react-native-community/geolocation
+  npm install --save react-native-maps
+  npm install --save react-native-chart-kit
+  npm install --save react-native-svg
   npm install --save react-native-daterange-picker
-  npm install moment --save
+  npm install --save moment
+  npm install --save react-native-dialog-input
+  npm install --save react-native-modal-selector
   ```
 * For Andoid:
   * Add Lines to \android\app\src\main\AndroidManifest.xml:
@@ -45,6 +48,10 @@ A step by step guide to get the React Native Application to run!
      <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyAE83-j5Perr4b6hk7b1_Kfcwma88_Fg2Q"/>
      <uses-library android:name="org.apache.http.legacy" android:required="false"/>
    </application>
+  ```
+  * Change Line:
+  ```
+  android:windowSoftInputMode="adjustPan"
   ```
   * Add Lines to \android\build.gradle:
   ```
