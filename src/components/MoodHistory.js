@@ -88,7 +88,7 @@ class MoodHistory extends Component {
                         style={styles.header}
                     >Old Moods</Text>
                     <FlatList
-                        style={{ height: 150 }}
+                        style={{ height: 450 }}
                         number={2}
                         data={this.state.moods}
                         renderItem={({ item }) => <ListItem mood={item} navigation={navigation} />}

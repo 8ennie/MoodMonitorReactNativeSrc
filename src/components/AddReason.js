@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, Button, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity } from 'react-native'
 import Geolocation from '@react-native-community/geolocation';
 import Mood from '../models/Mood';
 import { Setting } from '../models/Setting';
@@ -34,6 +34,7 @@ class AddReason extends Component {
             location.latitude = info.coords.latitude.toString();
             this.setState({ location: location })
             this.fetchWeather()
+        }, error => {console.log("No Location Data");
         });
     }
 
@@ -215,7 +216,6 @@ class AddReason extends Component {
                             cancelText="Close"
                         />
                     </View>
-
                 </ExpandPanel>
 
 

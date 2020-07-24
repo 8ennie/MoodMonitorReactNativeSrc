@@ -42,15 +42,6 @@ class Settings extends Component {
                         style={styles.menuItem}
                     >Delete all Moods</Text>
 
-                    <Text
-                        onPress={() => this.loadAllData()}
-                        style={styles.menuItem}
-                    >Add Preloaded Moods</Text>
-
-                    <Text
-                        onPress={() => this.addRandomeMoods()}
-                        style={styles.menuItem}
-                    >Add Random Moods</Text>
                 </View>
 
                 <View style={styles.menu}>
@@ -95,11 +86,12 @@ class Settings extends Component {
 
 
     deleteAllMoods() {
-        let realm = new Realm({ schema: [Mood, Location, Weather] });
+        let realm = Mood.getRealm();
         realm.write(() => {
             realm.deleteAll()
         });
         console.log("All Moods Deleted");
+        realm.close()
     }
 
     loadAllData() {

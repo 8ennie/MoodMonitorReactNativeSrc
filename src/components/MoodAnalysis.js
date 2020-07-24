@@ -10,9 +10,6 @@ import ModalSelector from 'react-native-modal-selector';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 
-
-const Realm = require('realm');
-
 class MoodAnalysis extends Component {
 
     realm = Mood.getRealm();
@@ -75,7 +72,7 @@ class MoodAnalysis extends Component {
     }
 
     mood() {
-
+        
         var moods = this.avgMoods(this.realm.objects('Mood').sorted('date'));
 
         return (
@@ -302,7 +299,6 @@ class MoodAnalysis extends Component {
                     <ModalSelector
                         data={data}
                         initValue={"Select a Reason!"}
-                        onChange={(item) => { }}
                         onModalClose={(item) => this.reasonChange(item)}
                     >
                         <Text style={{ textAlign: 'center', fontSize: 20, borderWidth: 1, borderRadius: 15, marginHorizontal: 15, paddingVertical: 5 }}>{this.state.reason ? this.state.reason : "Choose a Reason"}</Text>
@@ -375,15 +371,15 @@ class MoodAnalysis extends Component {
                             )
                             : null
                     }
-
-
-
                 </View>
             </ExpandPanel>
         );
     }
     reasonChange(reason) {
-        this.setState({ reasonMoods: this.realm.objectForPrimaryKey('Reason', reason.key).moods.sorted('date'), reason: reason.key })
+      
+        if(reason.key){
+            this.setState({ reasonMoods: this.realm.objectForPrimaryKey('Reason', reason.key).moods.sorted('date'), reason: reason.key })
+        }
     }
     mainMoodImg(mood) {
         if (mood == 1) {
