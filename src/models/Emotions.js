@@ -22,7 +22,7 @@ export default Emotions = [
             if (Math.random() >= 0.5) {
                 return "Nothing in the world is as contagious as, happienes and laughter."
             } else {
-                return "Be so happy that ehen others look at you, tey alos become happy."
+                return "Be so happy that even others look at you, they also become happy."
             }
         }
     },
@@ -46,7 +46,7 @@ export default Emotions = [
             if (args.mood.date.getHours() > 17) {
                 return "You are nearly there, you survived most of the Day, just a little longer, you can do this!"
             } else {
-                return "Dont Stop when you're tiered. Stop when you are DONE."
+                return "Dont Stop when you're tired. Stop when you are DONE."
             }
         }
     },
@@ -56,9 +56,9 @@ export default Emotions = [
         desc: "",
         response: (args) => {
             if (Math.random() >= 0.5) {
-                return "Every challanging situation you solve now, you dont have to face in the future."
+                return "Every challenging situation you solve now, you dont have to face in the future."
             } else {
-                return "Life is simple, if your sad smile. And if your happy, keep laughing."
+                return "Life is simple, if you are sad, smile. And if your happy, keep laughing."
             }
         }
     },
@@ -70,7 +70,7 @@ export default Emotions = [
             if (args.mood.date.getHours() > 17) {
                 return "Nothing brings us closer to our goals, then a break."
             } else {
-                return "Best way to treat Stress has two letters: NO."
+                return "Best way to treat stress has two letters: NO."
             }
         }
     },
